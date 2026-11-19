@@ -4,6 +4,22 @@
 
 ![構成図](docs/architecture.svg)
 
+## チャット画面
+
+ローカルPCのチャット画面（Streamlit）から質問すると、SSM のポート転送で EC2 を通って AgentCore のエージェントが答えます。答えの下に「使った道具」が出るので、どの部品が動いたかが分かります。
+
+**マニュアル（ナレッジベース）を検索して答える**（左上はポート転送の画面）
+
+![黒澤クエストはどんなゲーム？と聞いた画面](docs/images/chat-overview.png)
+
+**冒険者ギルドAPI（仮・Lambda）を呼んで答える**
+
+![やくそうの在庫を調べてと聞いた画面](docs/images/chat-api.png)
+
+**黒澤クエストと仮API以外の質問は、EC2 のマスタールールで断る**
+
+![今日のご飯は？と聞いて断られた画面](docs/images/chat-refusal.png)
+
 ## まず読むもの
 - 手順書（Web で読む）: https://kabamodoki.github.io/kurosawaAgent/ （GitHub Pages。`docs/` フォルダを公開）
 - 手順書（読みやすい版）: [docs/setup-guide.html](docs/setup-guide.html) をブラウザで開く（左に目次、コードのコピーボタン、手順ごとの「済」チェック）
