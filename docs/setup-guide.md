@@ -17,7 +17,7 @@
 - 題材は架空のゲーム「黒澤クエスト」です。マニュアル10項目をナレッジベースに入れて、質問に答えさせます
 - EC2 のマスタールールで「黒澤クエスト」と「冒険者ギルドAPI（仮）」以外の質問は断らせます
 - Lambda は外部APIを呼んだふりだけをします（実際には通信しません）
-- Salesforce と API Gateway は今回は作りません（構成図に破線で描いてあるだけです）
+- 本番の入口に置く「商用サービス（仮）」と API Gateway は今回は作りません（構成図に破線で描いてあるだけです）。商用サービス（仮）は、CRM・業務システム・社内ポータルなど、HTTP で API を呼べるものなら何でもかまいません
 
 > **Bedrock と AgentCore の関係**: 古くなったのは Bedrock の中の「Bedrock Agents（今の名前は Agents Classic）」という機能だけで、Bedrock 本体は現役です。今回は Agents Classic は使いません。エージェントを動かす場所は **Amazon Bedrock AgentCore**（Bedrock の仲間の新しいサービス）、エージェントが考えるときに使う LLM は **Amazon Bedrock** から借ります。
 
@@ -731,8 +731,8 @@ LLM の答え方は毎回少し変わります。中身が合っていれば OK 
 
 | 項目 | 今回（検証） | 本番の考え方 |
 |------|-----------|------------|
-| 入口 | ローカルPC → SSM のポート転送 | Salesforce（Apex / LWC）→ API Gateway → EC2 |
-| 利用者の認証 | IAM ユーザーのアクセスキー（本人だけ） | API Gateway で OAuth 2.0 の認証（JWT オーソライザーなど）。Salesforce 側は外部の認証情報（Named Credential など）でトークンを付けて呼ぶ【要確認: 組み合わせ方は設計時に確認】 |
+| 入口 | ローカルPC → SSM のポート転送 | 商用サービス（仮。CRM・業務システムなど HTTP で呼べるものなら何でも）→ API Gateway → EC2 |
+| 利用者の認証 | IAM ユーザーのアクセスキー（本人だけ） | API Gateway で OAuth 2.0 の認証（JWT オーソライザーなど）。商用サービス（仮）の側は、OAuth のトークンを付けて API Gateway を呼ぶ【要確認: 組み合わせ方は設計時に確認】 |
 | EC2 の置き場所 | デフォルトVPC・パブリックIPあり・インバウンド0件 | プライベートサブネット。パブリックIPなし。API Gateway からは VPC リンクと内部のロードバランサー経由 |
 | EC2 から AWS への通信 | パブリックIPでインターネット経由 | VPC エンドポイント（SSM 用の ssm・ssmmessages・ec2messages、AgentCore、CloudWatch Logs、S3 など）か NAT ゲートウェイ【要確認: AgentCore の VPC エンドポイントの対応】 |
 | AgentCore の呼び出し | EC2 の IAM ロール | 同じでもよい。利用者ごとに分けるなら、利用者IDのヘッダー（`InvokeAgentRuntimeForUser` の権限が必要）や、Runtime 側の OAuth の受け付けを使う |

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" width="1100" height="640" role="img" aria-labelledby="kq-title kq-desc">
   <title id="kq-title">黒澤クエスト AgentCore 検証チャットの構成図</title>
-  <desc id="kq-desc">ローカルPCのチャット画面から SSM のポート転送で EC2 につなぐ。EC2 は質問を成形してマスタールールを付け、AgentCore Runtime のエージェントを呼ぶ。エージェントは Bedrock の LLM、ナレッジベース、S3（文書用）、Lambda（ギルドAPI・仮）を使う。ナレッジベースは S3（マニュアル用）から同期する。Salesforce と API Gateway は今回は作らない。</desc>
+  <desc id="kq-desc">ローカルPCのチャット画面から SSM のポート転送で EC2 につなぐ。EC2 は質問を成形してマスタールールを付け、AgentCore Runtime のエージェントを呼ぶ。エージェントは Bedrock の LLM、ナレッジベース、S3（文書用）、Lambda（ギルドAPI・仮）を使う。ナレッジベースは S3（マニュアル用）から同期する。本番の入口に置く商用サービス（仮）と API Gateway は今回は作らない。</desc>
   <defs>
     <style>
       .bg{fill:#ffffff}
@@ -52,9 +52,9 @@
   <rect x="0" y="0" width="1100" height="640" rx="16" class="bg"/>
   <text x="24" y="34" class="txt title">黒澤クエスト AgentCore 検証チャット 構成図</text>
 
-  <!-- 本番だけの入口（今回は作らない） -->
+  <!-- 本番だけの入口（今回は作らない）。商用サービス（仮）は CRM・業務システムなど何でもよい -->
   <rect x="24" y="92" width="200" height="60" rx="10" class="todo"/>
-  <text x="124" y="119" text-anchor="middle" class="txt h todo-txt">Salesforce</text>
+  <text x="124" y="119" text-anchor="middle" class="txt h todo-txt">商用サービス（仮）</text>
   <text x="124" y="137" text-anchor="middle" class="txt s todo-txt">今回は作らない</text>
 
   <!-- ローカルPC -->
