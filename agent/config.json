@@ -1,0 +1,12 @@
+{
+  "_comment": "値を書き換えてから python build_zip.py で zip を作ってください。MODEL_ID はわざと空にしています（モデルは決め打ちしません）。",
+  "MODEL_ID": "",
+  "AWS_REGION": "ap-northeast-1",
+  "KB_ID": "",
+  "KB_TYPE": "managed",
+  "KB_RESULTS": 5,
+  "DOCS_BUCKET": "",
+  "DOCS_PREFIX": "documents/",
+  "GUILD_LAMBDA_NAME": "kq-guild-api-mock",
+  "MAX_DOC_CHARS": 8000
+}

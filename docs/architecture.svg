@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" width="1100" height="640" role="img" aria-labelledby="kq-title kq-desc">
+  <title id="kq-title">黒澤クエスト AgentCore 検証チャットの構成図</title>
+  <desc id="kq-desc">ローカルPCのチャット画面から SSM のポート転送で EC2 につなぐ。EC2 は質問を成形してマスタールールを付け、AgentCore Runtime のエージェントを呼ぶ。エージェントは Bedrock の LLM、ナレッジベース、S3（文書用）、Lambda（ギルドAPI・仮）を使う。ナレッジベースは S3（マニュアル用）から同期する。Salesforce と API Gateway は今回は作らない。</desc>
+  <defs>
+    <style>
+      .bg{fill:#ffffff}
+      .txt{fill:#1f2937;font-family:"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans JP",sans-serif}
+      .title{font-size:17px;font-weight:700}
+      .h{font-size:13.5px;font-weight:700}
+      .s{font-size:11.5px;fill:#4b5563}
+      .group{font-size:13px;font-weight:700}
+      .aws{fill:#fff8ef;stroke:#e8a33d;stroke-width:1.5}
+      .local{fill:#f3f4ff;stroke:#7c83db;stroke-width:1.5}
+      .vpc{fill:#f4fbf7;stroke:#3aa76d;stroke-width:1.5;stroke-dasharray:6 4}
+      .code{fill:#e6f3fb;stroke:#2b7bb9;stroke-width:1.5}
+      .svc{fill:#ffffff;stroke:#8a94a3;stroke-width:1.5}
+      .todo{fill:none;stroke:#9aa3af;stroke-width:1.5;stroke-dasharray:6 4}
+      .todo-txt{fill:#6b7280}
+      .line{stroke:#374151;stroke-width:1.6;fill:none}
+      .dash{stroke:#9aa3af;stroke-width:1.6;fill:none;stroke-dasharray:6 4}
+      .head{fill:#374151}
+      .head-dash{fill:#9aa3af}
+      .badge{fill:#1f2937}
+      .badge-txt{fill:#ffffff;font-size:12px;font-weight:700}
+      @media (prefers-color-scheme: dark){
+        .bg{fill:#0f1720}
+        .txt{fill:#e5e7eb}
+        .s{fill:#a7b0bd}
+        .aws{fill:#1d1a14;stroke:#d89a3c}
+        .local{fill:#181a33;stroke:#8f96ea}
+        .vpc{fill:#11211a;stroke:#4cbf83}
+        .code{fill:#102a3d;stroke:#5aa9e0}
+        .svc{fill:#161d27;stroke:#7d8796}
+        .todo{stroke:#6b7480}
+        .todo-txt{fill:#8b95a3}
+        .line{stroke:#cfd6df}
+        .dash{stroke:#6b7480}
+        .head{fill:#cfd6df}
+        .head-dash{fill:#6b7480}
+        .badge{fill:#e5e7eb}
+        .badge-txt{fill:#111827}
+      }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="head"/>
+    </marker>
+    <marker id="arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="head-dash"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="640" rx="16" class="bg"/>
+  <text x="24" y="34" class="txt title">黒澤クエスト AgentCore 検証チャット 構成図</text>
+
+  <!-- 本番だけの入口（今回は作らない） -->
+  <rect x="24" y="92" width="200" height="60" rx="10" class="todo"/>
+  <text x="124" y="119" text-anchor="middle" class="txt h todo-txt">Salesforce</text>
+  <text x="124" y="137" text-anchor="middle" class="txt s todo-txt">今回は作らない</text>
+
+  <!-- ローカルPC -->
+  <rect x="24" y="170" width="200" height="290" rx="12" class="local"/>
+  <text x="36" y="192" class="txt group">ローカルPC</text>
+  <rect x="40" y="206" width="168" height="88" rx="10" class="code"/>
+  <text x="124" y="236" text-anchor="middle" class="txt h">チャット画面</text>
+  <text x="124" y="256" text-anchor="middle" class="txt s">Python / Streamlit</text>
+  <text x="124" y="274" text-anchor="middle" class="txt s">127.0.0.1:8501</text>
+  <rect x="40" y="352" width="168" height="88" rx="10" class="svc"/>
+  <text x="124" y="382" text-anchor="middle" class="txt h">ポート転送</text>
+  <text x="124" y="402" text-anchor="middle" class="txt s">AWS CLI + SSM plugin</text>
+  <text x="124" y="420" text-anchor="middle" class="txt s">127.0.0.1:8000</text>
+  <line x1="124" y1="294" x2="124" y2="350" class="line" marker-end="url(#arrow)"/>
+
+  <!-- AWS -->
+  <rect x="248" y="52" width="828" height="476" rx="14" class="aws"/>
+  <text x="264" y="78" class="txt group">AWS（東京リージョン ap-northeast-1）</text>
+
+  <rect x="268" y="92" width="150" height="60" rx="10" class="todo"/>
+  <text x="343" y="119" text-anchor="middle" class="txt h todo-txt">API Gateway</text>
+  <text x="343" y="137" text-anchor="middle" class="txt s todo-txt">今回は作らない</text>
+
+  <rect x="268" y="352" width="150" height="88" rx="10" class="svc"/>
+  <text x="343" y="382" text-anchor="middle" class="txt h">SSM</text>
+  <text x="343" y="402" text-anchor="middle" class="txt s">Session Manager</text>
+  <text x="343" y="420" text-anchor="middle" class="txt s">IAM で本人だけ</text>
+
+  <rect x="446" y="236" width="206" height="236" rx="12" class="vpc"/>
+  <text x="460" y="258" class="txt group">デフォルトVPC</text>
+  <rect x="462" y="286" width="174" height="170" rx="10" class="code"/>
+  <text x="549" y="314" text-anchor="middle" class="txt h">EC2</text>
+  <text x="549" y="334" text-anchor="middle" class="txt s">Python / FastAPI</text>
+  <text x="549" y="362" text-anchor="middle" class="txt s">質問を成形し</text>
+  <text x="549" y="380" text-anchor="middle" class="txt s">マスタールールを付ける</text>
+  <text x="549" y="408" text-anchor="middle" class="txt s">127.0.0.1:8000 で待受</text>
+  <text x="549" y="426" text-anchor="middle" class="txt s">インバウンド 0 件</text>
+
+  <rect x="684" y="300" width="170" height="142" rx="10" class="code"/>
+  <text x="769" y="328" text-anchor="middle" class="txt h">AgentCore Runtime</text>
+  <text x="769" y="348" text-anchor="middle" class="txt s">Python / Strands</text>
+  <text x="769" y="376" text-anchor="middle" class="txt s">黒澤クエスト</text>
+  <text x="769" y="394" text-anchor="middle" class="txt s">案内エージェント</text>
+  <text x="769" y="420" text-anchor="middle" class="txt s">LLM が道具を選んで使う</text>
+
+  <rect x="912" y="92" width="148" height="60" rx="10" class="svc"/>
+  <text x="986" y="119" text-anchor="middle" class="txt h">Bedrock の LLM</text>
+  <text x="986" y="137" text-anchor="middle" class="txt s">モデル未定（設定で指定）</text>
+
+  <rect x="912" y="182" width="148" height="60" rx="10" class="svc"/>
+  <text x="986" y="209" text-anchor="middle" class="txt h">ナレッジベース</text>
+  <text x="986" y="227" text-anchor="middle" class="txt s">Managed 型・Retrieve</text>
+
+  <rect x="912" y="268" width="148" height="52" rx="10" class="svc"/>
+  <text x="986" y="290" text-anchor="middle" class="txt h">S3（マニュアル用）</text>
+  <text x="986" y="308" text-anchor="middle" class="txt s">マニュアル10項目</text>
+
+  <rect x="912" y="352" width="148" height="60" rx="10" class="svc"/>
+  <text x="986" y="379" text-anchor="middle" class="txt h">S3（文書用）</text>
+  <text x="986" y="397" text-anchor="middle" class="txt s">依頼書・買い出しリスト</text>
+
+  <rect x="912" y="446" width="148" height="60" rx="10" class="code"/>
+  <text x="986" y="473" text-anchor="middle" class="txt h">Lambda（Python）</text>
+  <text x="986" y="491" text-anchor="middle" class="txt s">ギルドAPI（仮）</text>
+
+  <!-- AWS の外: 外部API（仮） -->
+  <rect x="912" y="568" width="148" height="52" rx="10" class="todo"/>
+  <text x="986" y="590" text-anchor="middle" class="txt h todo-txt">外部API（仮）</text>
+  <text x="986" y="608" text-anchor="middle" class="txt s todo-txt">実際には呼ばない</text>
+
+  <!-- 矢印 -->
+  <line x1="224" y1="122" x2="266" y2="122" class="dash" marker-end="url(#arrow-dash)"/>
+  <path d="M418,122 H600 V284" class="dash" marker-end="url(#arrow-dash)"/>
+  <text x="509" y="114" text-anchor="middle" class="txt s">本番だけの道</text>
+  <line x1="208" y1="396" x2="266" y2="396" class="line" marker-end="url(#arrow)"/>
+  <line x1="418" y1="396" x2="460" y2="396" class="line" marker-end="url(#arrow)"/>
+  <line x1="636" y1="371" x2="682" y2="371" class="line" marker-end="url(#arrow)"/>
+  <line x1="854" y1="371" x2="880" y2="371" class="line"/>
+  <line x1="880" y1="122" x2="880" y2="476" class="line"/>
+  <line x1="880" y1="122" x2="910" y2="122" class="line" marker-end="url(#arrow)"/>
+  <line x1="880" y1="212" x2="910" y2="212" class="line" marker-end="url(#arrow)"/>
+  <line x1="880" y1="382" x2="910" y2="382" class="line" marker-end="url(#arrow)"/>
+  <line x1="880" y1="476" x2="910" y2="476" class="line" marker-end="url(#arrow)"/>
+  <line x1="986" y1="268" x2="986" y2="244" class="line" marker-end="url(#arrow)"/>
+  <text x="996" y="260" class="txt s">同期</text>
+  <line x1="986" y1="506" x2="986" y2="566" class="dash" marker-end="url(#arrow-dash)"/>
+  <text x="996" y="545" class="txt s">呼んだふり</text>
+
+  <!-- 番号（手順書「通信の流れ」と同じ番号） -->
+  <circle cx="148" cy="322" r="11" class="badge"/><text x="148" y="326" text-anchor="middle" class="txt badge-txt">1</text>
+  <circle cx="238" cy="378" r="11" class="badge"/><text x="238" y="382" text-anchor="middle" class="txt badge-txt">2</text>
+  <circle cx="659" cy="353" r="11" class="badge"/><text x="659" y="357" text-anchor="middle" class="txt badge-txt">3</text>
+  <circle cx="867" cy="350" r="11" class="badge"/><text x="867" y="354" text-anchor="middle" class="txt badge-txt">4</text>
+  <circle cx="36" cy="556" r="11" class="badge"/><text x="36" y="560" text-anchor="middle" class="txt badge-txt">5</text>
+  <text x="54" y="561" class="txt s">答えは同じ道を逆にたどって、チャット画面に表示される</text>
+
+  <!-- 凡例 -->
+  <rect x="24" y="590" width="22" height="14" rx="3" class="code"/>
+  <text x="54" y="602" class="txt s">今回作るもの（ソースあり）</text>
+  <rect x="240" y="590" width="22" height="14" rx="3" class="svc"/>
+  <text x="270" y="602" class="txt s">AWS のサービス（画面で設定）</text>
+  <rect x="470" y="590" width="22" height="14" rx="3" class="todo"/>
+  <text x="500" y="602" class="txt s">今回は作らない・呼ばない（破線）</text>
+</svg>

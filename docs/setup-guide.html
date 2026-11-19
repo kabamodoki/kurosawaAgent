@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentCore 検証チャット 手順書</title>
+<style>
+:root{
+  --bg:#f7f8fa; --panel:#ffffff; --text:#1f2933; --muted:#5f6b7a; --line:#e2e6eb;
+  --accent:#1f6fb2; --accent-soft:#e8f1fa; --code-bg:#0f1720; --code-text:#e6edf3;
+  --inline-bg:#eef1f5; --warn:#a15c00; --warn-bg:#fff3dc; --ok:#1d7a4c; --ok-bg:#e4f5ec;
+  --th:#f0f3f7; --zebra:#fafbfc;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0e1319; --panel:#151c24; --text:#e3e8ee; --muted:#9aa6b4; --line:#26313d;
+    --accent:#6cb4f0; --accent-soft:#16283a; --code-bg:#0a0f14; --code-text:#e6edf3;
+    --inline-bg:#1f2a36; --warn:#f2b45a; --warn-bg:#3a2a10; --ok:#5fd19a; --ok-bg:#12301f;
+    --th:#1b2430; --zebra:#17202a;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  font-size:15.5px;line-height:1.8}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:100vh}
+nav.toc{position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 18px;
+  border-right:1px solid var(--line);background:var(--panel);font-size:13.5px;line-height:1.55}
+nav.toc .brand{font-weight:700;font-size:15px;margin:0 0 4px}
+nav.toc .progress{margin:10px 0 18px;color:var(--muted)}
+nav.toc .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+nav.toc .bar span{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+nav.toc ul{list-style:none;margin:0;padding:0}
+nav.toc > ul > li{margin:0 0 10px}
+nav.toc > ul > li > a{font-weight:700;color:var(--text)}
+nav.toc ul ul{margin:4px 0 0 6px;padding-left:8px;border-left:2px solid var(--line)}
+nav.toc ul ul li{margin:2px 0}
+nav.toc a{color:var(--muted);text-decoration:none;display:block;padding:2px 6px;border-radius:5px}
+nav.toc a:hover{background:var(--accent-soft);color:var(--accent)}
+nav.toc a.active{background:var(--accent-soft);color:var(--accent)}
+nav.toc a.done::before{content:"✓ ";color:var(--ok);font-weight:700}
+main{padding:40px 48px 120px;max-width:1040px;width:100%}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-bottom:28px}
+.hero h1{margin:0 0 6px;font-size:26px;line-height:1.4}
+.hero p{margin:0;color:var(--muted)}
+.hero .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 12px;font-size:13px}
+article > h1:first-child, article > h1:first-child + ul, article > h1:first-child + ul + hr{display:none}
+article > h2:first-of-type{border-top:none;margin-top:8px;padding-top:0}
+h2{font-size:22px;margin:56px 0 14px;padding-top:18px;border-top:2px solid var(--line)}
+h3{font-size:17.5px;margin:34px 0 10px;display:flex;align-items:center;gap:10px}
+h3 .step-done{margin-left:auto;font-size:13px;font-weight:400;color:var(--muted);
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;
+  border:1px solid var(--line);border-radius:999px;padding:2px 12px;background:var(--panel)}
+h3 .step-done input{accent-color:var(--ok);margin:0}
+h3.is-done .step-done{background:var(--ok-bg);color:var(--ok);border-color:transparent}
+p,li{overflow-wrap:anywhere}
+a{color:var(--accent)}
+strong{font-weight:700}
+code{font-family:"Cascadia Code","Consolas",ui-monospace,monospace;font-size:.88em;
+  background:var(--inline-bg);padding:1px 6px;border-radius:5px}
+pre{position:relative;background:var(--code-bg);color:var(--code-text);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;line-height:1.6;margin:12px 0}
+pre code{background:none;padding:0;font-size:13.5px;color:inherit;white-space:pre}
+.copy{position:absolute;top:8px;right:8px;font:inherit;font-size:12px;cursor:pointer;
+  background:#2a3644;color:#e6edf3;border:1px solid #3b4a5c;border-radius:6px;padding:2px 10px}
+.copy:hover{background:#34445a}
+.table-wrap{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--th);white-space:nowrap}
+tr:nth-child(even) td{background:var(--zebra)}
+tr:last-child td{border-bottom:none}
+.check{display:inline-block;background:var(--warn-bg);color:var(--warn);font-size:12px;font-weight:700;
+  border-radius:5px;padding:0 7px;margin:0 2px;line-height:1.7;white-space:nowrap}
+.check-note{color:var(--warn);font-size:13px;margin-left:2px}
+figure.diagram{margin:16px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+figure.diagram img{width:100%;height:auto;display:block}
+figcaption{color:var(--muted);font-size:13px;margin-top:6px;text-align:center}
+blockquote{margin:14px 0;padding:12px 16px;border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:0 10px 10px 0}
+blockquote p{margin:0}
+hr{border:none;border-top:1px solid var(--line);margin:28px 0}
+.menu-btn{display:none}
+@media (max-width: 900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav.toc{position:fixed;inset:0 25% 0 0;z-index:10;transform:translateX(-105%);transition:transform .2s;
+    box-shadow:0 0 24px rgba(0,0,0,.25)}
+  body.nav-open nav.toc{transform:none}
+  main{padding:20px 16px 100px}
+  .menu-btn{display:inline-block;position:fixed;right:16px;bottom:16px;z-index:11;font:inherit;
+    background:var(--accent);color:#fff;border:none;border-radius:999px;padding:10px 18px;
+    box-shadow:0 4px 14px rgba(0,0,0,.25)}
+  h3{flex-wrap:wrap}
+  h3 .step-done{margin-left:0}
+}
+@media print{
+  nav.toc,.menu-btn,.copy,.step-done{display:none!important}
+  .layout{display:block} main{max-width:none;padding:0}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc" aria-label="目次">
+    <p class="brand">AgentCore 検証チャット 手順書</p>
+    <div class="progress"><span id="progress-text">0 / 0 手順 済み</span><div class="bar"><span id="progress-bar"></span></div></div>
+    <ul><li><a href="#s-0-はじめに">0. はじめに</a><ul><li><a href="#s-0-1-この手順書でできること" data-step="s-0-1-この手順書でできること">0-1 この手順書でできること</a></li><li><a href="#s-0-2-表記のルール" data-step="s-0-2-表記のルール">0-2 表記のルール</a></li><li><a href="#s-0-3-料金について-必ず読む" data-step="s-0-3-料金について-必ず読む">0-3 料金について（必ず読む）</a></li><li><a href="#s-0-4-控えておく値-メモ用の表" data-step="s-0-4-控えておく値-メモ用の表">0-4 控えておく値（メモ用の表）</a></li></ul></li><li><a href="#s-1-全体像">1. 全体像</a><ul><li><a href="#s-1-1-構成図" data-step="s-1-1-構成図">1-1 構成図</a></li><li><a href="#s-1-2-部品の役割" data-step="s-1-2-部品の役割">1-2 部品の役割</a></li><li><a href="#s-1-3-通信の流れ-図の番号と同じ" data-step="s-1-3-通信の流れ-図の番号と同じ">1-3 通信の流れ（図の番号と同じ）</a></li><li><a href="#s-1-4-権限の一覧-誰が-何に-何を許可されるか" data-step="s-1-4-権限の一覧-誰が-何に-何を許可されるか">1-4 権限の一覧（誰が・何に・何を許可されるか）</a></li><li><a href="#s-1-5-作るものの名前-早見表" data-step="s-1-5-作るものの名前-早見表">1-5 作るものの名前（早見表）</a></li><li><a href="#s-1-6-ソースの置き場所" data-step="s-1-6-ソースの置き場所">1-6 ソースの置き場所</a></li></ul></li><li><a href="#s-2-事前準備">2. 事前準備</a><ul><li><a href="#s-2-1-aws-コンソールにサインインして-東京リージョンにする" data-step="s-2-1-aws-コンソールにサインインして-東京リージョンにする">2-1 AWS コンソールにサインインして、東京リージョンにする</a></li><li><a href="#s-2-2-アカウントidを控える" data-step="s-2-2-アカウントidを控える">2-2 アカウントIDを控える</a></li><li><a href="#s-2-3-ローカルpc-windows-に道具を入れる" data-step="s-2-3-ローカルpc-windows-に道具を入れる">2-3 ローカルPC（Windows）に道具を入れる</a></li><li><a href="#s-2-4-使うモデルを決めて-モデルidを控える" data-step="s-2-4-使うモデルを決めて-モデルidを控える">2-4 使うモデルを決めて、モデルIDを控える</a></li></ul></li><li><a href="#s-3-s3-バケットを2つ作り-ファイルを入れる">3. S3: バケットを2つ作り、ファイルを入れる</a><ul><li><a href="#s-3-1-マニュアル用バケット" data-step="s-3-1-マニュアル用バケット">3-1 マニュアル用バケット</a></li><li><a href="#s-3-2-文書用バケット" data-step="s-3-2-文書用バケット">3-2 文書用バケット</a></li></ul></li><li><a href="#s-4-ナレッジベース-managed-型-を作る">4. ナレッジベース（Managed 型）を作る</a><ul><li><a href="#s-4-1-作成" data-step="s-4-1-作成">4-1 作成</a></li><li><a href="#s-4-2-同期-マニュアルを取り込む" data-step="s-4-2-同期-マニュアルを取り込む">4-2 同期（マニュアルを取り込む）</a></li><li><a href="#s-4-3-ナレッジベースidを控える" data-step="s-4-3-ナレッジベースidを控える">4-3 ナレッジベースIDを控える</a></li><li><a href="#s-4-4-画面で検索を試す" data-step="s-4-4-画面で検索を試す">4-4 画面で検索を試す</a></li></ul></li><li><a href="#s-5-lambda-ギルドapi-仮-を作る">5. Lambda（ギルドAPI・仮）を作る</a><ul><li><a href="#s-5-1-関数を作る" data-step="s-5-1-関数を作る">5-1 関数を作る</a></li><li><a href="#s-5-2-コードを入れる" data-step="s-5-2-コードを入れる">5-2 コードを入れる</a></li><li><a href="#s-5-3-テストする" data-step="s-5-3-テストする">5-3 テストする</a></li></ul></li><li><a href="#s-6-agentcore-runtime-にエージェントを置く">6. AgentCore Runtime にエージェントを置く</a><ul><li><a href="#s-6-1-設定ファイル-config-json-を書く" data-step="s-6-1-設定ファイル-config-json-を書く">6-1 設定ファイル（config.json）を書く</a></li><li><a href="#s-6-2-zip-を作る" data-step="s-6-2-zip-を作る">6-2 zip を作る</a></li><li><a href="#s-6-3-コンソールでエージェントを置く-ランタイムを作成" data-step="s-6-3-コンソールでエージェントを置く-ランタイムを作成">6-3 コンソールでエージェントを置く（ランタイムを作成）</a></li><li><a href="#s-6-4-runtime-arn-を控える" data-step="s-6-4-runtime-arn-を控える">6-4 Runtime ARN を控える</a></li><li><a href="#s-6-5-実行ロールに道具の権限を足す" data-step="s-6-5-実行ロールに道具の権限を足す">6-5 実行ロールに道具の権限を足す</a></li><li><a href="#s-6-6-コンソールでエージェントを試す" data-step="s-6-6-コンソールでエージェントを試す">6-6 コンソールでエージェントを試す</a></li></ul></li><li><a href="#s-7-ec2-用の-iam-ロールを作る">7. EC2 用の IAM ロールを作る</a><ul><li><a href="#s-7-1-ロールを作る" data-step="s-7-1-ロールを作る">7-1 ロールを作る</a></li><li><a href="#s-7-2-agentcore-を呼ぶ権限を足す" data-step="s-7-2-agentcore-を呼ぶ権限を足す">7-2 AgentCore を呼ぶ権限を足す</a></li></ul></li><li><a href="#s-8-ec2-を起動する">8. EC2 を起動する</a><ul><li><a href="#s-8-1-起動の設定" data-step="s-8-1-起動の設定">8-1 起動の設定</a></li><li><a href="#s-8-2-起動を待つ" data-step="s-8-2-起動を待つ">8-2 起動を待つ</a></li><li><a href="#s-8-3-インスタンスidを控える" data-step="s-8-3-インスタンスidを控える">8-3 インスタンスIDを控える</a></li><li><a href="#s-8-4-インバウンドが0件か確かめる" data-step="s-8-4-インバウンドが0件か確かめる">8-4 インバウンドが0件か確かめる</a></li></ul></li><li><a href="#s-9-ec2-に受付apiを入れる-ブラウザから-ssm-でつなぐ">9. EC2 に受付APIを入れる（ブラウザから SSM でつなぐ）</a><ul><li><a href="#s-9-1-ec2-につなぐ" data-step="s-9-1-ec2-につなぐ">9-1 EC2 につなぐ</a></li><li><a href="#s-9-2-作業の準備" data-step="s-9-2-作業の準備">9-2 作業の準備</a></li><li><a href="#s-9-3-ファイルを3つ作る-貼り付け" data-step="s-9-3-ファイルを3つ作る-貼り付け">9-3 ファイルを3つ作る（貼り付け）</a></li><li><a href="#s-9-4-部品を入れる" data-step="s-9-4-部品を入れる">9-4 部品を入れる</a></li><li><a href="#s-9-5-設定ファイルを作る" data-step="s-9-5-設定ファイルを作る">9-5 設定ファイルを作る</a></li><li><a href="#s-9-6-手で起動して試す" data-step="s-9-6-手で起動して試す">9-6 手で起動して試す</a></li><li><a href="#s-9-7-常駐させる-ec2-を再起動しても自動で動くようにする" data-step="s-9-7-常駐させる-ec2-を再起動しても自動で動くようにする">9-7 常駐させる（EC2 を再起動しても自動で動くようにする）</a></li><li><a href="#s-9-8-接続を閉じる" data-step="s-9-8-接続を閉じる">9-8 接続を閉じる</a></li></ul></li><li><a href="#s-10-ローカルpc用の-iam-ユーザーを作る-ポート転送だけできる">10. ローカルPC用の IAM ユーザーを作る（ポート転送だけできる）</a><ul><li><a href="#s-10-1-ユーザーを作る" data-step="s-10-1-ユーザーを作る">10-1 ユーザーを作る</a></li><li><a href="#s-10-2-ポート転送だけの権限を付ける" data-step="s-10-2-ポート転送だけの権限を付ける">10-2 ポート転送だけの権限を付ける</a></li><li><a href="#s-10-3-アクセスキーを作る" data-step="s-10-3-アクセスキーを作る">10-3 アクセスキーを作る</a></li><li><a href="#s-10-4-自分のpcに設定する" data-step="s-10-4-自分のpcに設定する">10-4 自分のPCに設定する</a></li></ul></li><li><a href="#s-11-つないで動かす">11. つないで動かす</a><ul><li><a href="#s-11-1-ポート転送を始める" data-step="s-11-1-ポート転送を始める">11-1 ポート転送を始める</a></li><li><a href="#s-11-2-チャット画面を起動する" data-step="s-11-2-チャット画面を起動する">11-2 チャット画面を起動する</a></li><li><a href="#s-11-3-質問して確かめる" data-step="s-11-3-質問して確かめる">11-3 質問して確かめる</a></li><li><a href="#s-11-4-終わるとき" data-step="s-11-4-終わるとき">11-4 終わるとき</a></li></ul></li><li><a href="#s-12-うまくいかないとき">12. うまくいかないとき</a></li><li><a href="#s-13-片付け-削除の順番">13. 片付け（削除の順番）</a></li><li><a href="#s-14-本番に広げるときに変わる点">14. 本番に広げるときに変わる点</a></li><li><a href="#s-15-公式ドキュメントとの照合結果-報告">15. 公式ドキュメントとの照合結果（報告）</a><ul><li><a href="#s-15-1-依頼時の前提との照合" data-step="s-15-1-依頼時の前提との照合">15-1 依頼時の前提との照合</a></li><li><a href="#s-15-2-前提になかったが-手順に反映した事実" data-step="s-15-2-前提になかったが-手順に反映した事実">15-2 前提になかったが、手順に反映した事実</a></li><li><a href="#s-15-3-要確認の一覧" data-step="s-15-3-要確認の一覧">15-3 要確認の一覧</a></li></ul></li></ul>
+  </nav>
+  <main>
+    <header class="hero">
+      <h1>黒澤クエスト AgentCore 検証チャット 構築手順書</h1>
+      <p>ローカルPC → SSM → EC2 → AgentCore Runtime → LLM・ナレッジベース・S3・Lambda を、自分の AWS アカウントに作る手順です。</p>
+      <div class="chips"><span class="chip">東京リージョン ap-northeast-1</span><span class="chip">AWS 初心者向け</span><span class="chip">公式ドキュメント確認日 2026-11-20</span><span class="chip">各手順の「済」は、このブラウザに保存されます</span></div>
+    </header>
+    <article>
+<h1 id="s-黒澤クエスト-agentcore-検証チャット-構築手順書">黒澤クエスト AgentCore 検証チャット 構築手順書</h1>
+<ul>
+<li>対象: 個人の AWS アカウントで検証する人（AWS 初心者向け）</li>
+<li>リージョン: 東京（ap-northeast-1）</li>
+<li>公式ドキュメントでの確認日: 2026-11-20</li>
+<li>ソース一式: https://github.com/kabamodoki/kurosawaAgent （この手順書の中の <code>agent/</code> や <code>lambda/</code> などは、このリポジトリの中の場所です）</li>
+</ul>
+<hr />
+<h2 id="s-0-はじめに">0. はじめに</h2>
+<h3 id="s-0-1-この手順書でできること">0-1 この手順書でできること</h3>
+<p>ローカルPCのチャット画面から質問すると、次の順に処理されて答えが返ってくる仕組みを、自分の AWS アカウントに作ります。</p>
+<p>ローカルPCのチャット画面 → SSM（ポート転送）→ EC2（質問の成形・マスタールールを付ける）→ AgentCore Runtime（エージェント）→ Bedrock の LLM・ナレッジベース・S3・Lambda</p>
+<ul>
+<li>題材は架空のゲーム「黒澤クエスト」です。マニュアル10項目をナレッジベースに入れて、質問に答えさせます</li>
+<li>EC2 のマスタールールで「黒澤クエスト」と「冒険者ギルドAPI（仮）」以外の質問は断らせます</li>
+<li>Lambda は外部APIを呼んだふりだけをします（実際には通信しません）</li>
+<li>Salesforce と API Gateway は今回は作りません（構成図に破線で描いてあるだけです）</li>
+</ul>
+<blockquote>
+<p><strong>Bedrock と AgentCore の関係</strong>: 古くなったのは Bedrock の中の「Bedrock Agents（今の名前は Agents Classic）」という機能だけで、Bedrock 本体は現役です。今回は Agents Classic は使いません。エージェントを動かす場所は <strong>Amazon Bedrock AgentCore</strong>（Bedrock の仲間の新しいサービス）、エージェントが考えるときに使う LLM は <strong>Amazon Bedrock</strong> から借ります。</p>
+</blockquote>
+<h3 id="s-0-2-表記のルール">0-2 表記のルール</h3>
+<ul>
+<li>画面の文言は <strong>English</strong>（日本語）の形で書きます。コンソールの表示言語によって、どちらかが出ます</li>
+<li>AWS の画面は予告なく変わります。公式ドキュメントで確かめられなかった表記には <strong><span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span></strong> を付けました。ボタン名が少し違っても、意味が同じものを選んでください</li>
+<li><code>ACCOUNT_ID</code> などの大文字の言葉は、<strong>自分の値に置き換える場所</strong>です。そのまま入力しないでください（例: <code>kq-manual-ACCOUNT_ID</code> → <code>kq-manual-123456789012</code>。<code>123456789012</code> の部分は自分の12桁のアカウントID）</li>
+</ul>
+<h3 id="s-0-3-料金について-必ず読む">0-3 料金について（必ず読む）</h3>
+<p>この手順書では金額を書きません（料金は変わるため）。次の部品はお金がかかることがあります。検証が終わったら <strong>13章の片付け</strong> を必ず行ってください。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>部品</th>
+<th>お金がかかる元</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EC2</td>
+<td>起動している時間、ディスク（EBS）、パブリック IPv4 アドレス</td>
+</tr>
+<tr>
+<td>AgentCore Runtime</td>
+<td>使った分（エージェントが動いた分）</td>
+</tr>
+<tr>
+<td>Bedrock の LLM</td>
+<td>使った文字の量（トークン数）。モデルによって違う</td>
+</tr>
+<tr>
+<td>ナレッジベース（Managed 型）</td>
+<td>保存しているデータの量と検索の回数（内訳は公式の料金ページで確認<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span>）</td>
+</tr>
+<tr>
+<td>Lambda・S3・CloudWatch Logs</td>
+<td>使った分（今回の使い方ならごく少量）</td>
+</tr>
+</tbody>
+</table></div>
+<p>心配なら、先に「AWS Budgets」で予算のアラートを作っておくと安心です。</p>
+<h3 id="s-0-4-控えておく値-メモ用の表">0-4 控えておく値（メモ用の表）</h3>
+<p>作業の途中で出てくる値です。メモ帳などに控えながら進めてください。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>値</th>
+<th>例</th>
+<th>出てくる章</th>
+<th>使う章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>アカウントID（12桁）</td>
+<td><code>123456789012</code></td>
+<td>2-2</td>
+<td>3・6・7・10</td>
+</tr>
+<tr>
+<td>マニュアル用バケット名</td>
+<td><code>kq-manual-123456789012</code></td>
+<td>3-1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>文書用バケット名</td>
+<td><code>kq-docs-123456789012</code></td>
+<td>3-2</td>
+<td>6</td>
+</tr>
+<tr>
+<td>モデルID（推論プロファイルID）</td>
+<td>（自分で選ぶ）</td>
+<td>2-4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>ナレッジベースID（10文字）</td>
+<td><code>ABCDE12345</code></td>
+<td>4-3</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Runtime ARN</td>
+<td><code>arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/kq_agent-AbCdE12345</code></td>
+<td>6-4</td>
+<td>7・9</td>
+</tr>
+<tr>
+<td>RUNTIME_ID（ARN ではない。ARN の <code>runtime/</code> より後ろの部分だけ）</td>
+<td><code>kq_agent-AbCdE12345</code></td>
+<td>6-4</td>
+<td>7</td>
+</tr>
+<tr>
+<td>インスタンスID</td>
+<td><code>i-0123456789abcdef0</code></td>
+<td>8-3</td>
+<td>10・11</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="s-1-全体像">1. 全体像</h2>
+<h3 id="s-1-1-構成図">1-1 構成図</h3>
+<figure class="diagram"><img alt="構成図" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMTAwIDY0MCIgd2lkdGg9IjExMDAiIGhlaWdodD0iNjQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0ia3EtdGl0bGUga3EtZGVzYyI+CiAgPHRpdGxlIGlkPSJrcS10aXRsZSI+6buS5r6k44Kv44Ko44K544OIIEFnZW50Q29yZSDmpJzoqLzjg4Hjg6Pjg4Pjg4jjga7mp4vmiJDlm7M8L3RpdGxlPgogIDxkZXNjIGlkPSJrcS1kZXNjIj7jg63jg7zjgqvjg6tQQ+OBruODgeODo+ODg+ODiOeUu+mdouOBi+OCiSBTU00g44Gu44Od44O844OI6Lui6YCB44GnIEVDMiDjgavjgaTjgarjgZDjgIJFQzIg44Gv6LOq5ZWP44KS5oiQ5b2i44GX44Gm44Oe44K544K/44O844Or44O844Or44KS5LuY44GR44CBQWdlbnRDb3JlIFJ1bnRpbWUg44Gu44Ko44O844K444Kn44Oz44OI44KS5ZG844G244CC44Ko44O844K444Kn44Oz44OI44GvIEJlZHJvY2sg44GuIExMTeOAgeODiuODrOODg+OCuOODmeODvOOCueOAgVMz77yI5paH5pu455So77yJ44CBTGFtYmRh77yI44Ku44Or44OJQVBJ44O75Luu77yJ44KS5L2/44GG44CC44OK44Os44OD44K444OZ44O844K544GvIFMz77yI44Oe44OL44Ol44Ki44Or55So77yJ44GL44KJ5ZCM5pyf44GZ44KL44CCU2FsZXNmb3JjZSDjgaggQVBJIEdhdGV3YXkg44Gv5LuK5Zue44Gv5L2c44KJ44Gq44GE44CCPC9kZXNjPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuYmd7ZmlsbDojZmZmZmZmfQogICAgICAudHh0e2ZpbGw6IzFmMjkzNztmb250LWZhbWlseToiWXUgR290aGljIFVJIiwiTWVpcnlvIiwiSGlyYWdpbm8gU2FucyIsIk5vdG8gU2FucyBKUCIsc2Fucy1zZXJpZn0KICAgICAgLnRpdGxle2ZvbnQtc2l6ZToxN3B4O2ZvbnQtd2VpZ2h0OjcwMH0KICAgICAgLmh7Zm9udC1zaXplOjEzLjVweDtmb250LXdlaWdodDo3MDB9CiAgICAgIC5ze2ZvbnQtc2l6ZToxMS41cHg7ZmlsbDojNGI1NTYzfQogICAgICAuZ3JvdXB7Zm9udC1zaXplOjEzcHg7Zm9udC13ZWlnaHQ6NzAwfQogICAgICAuYXdze2ZpbGw6I2ZmZjhlZjtzdHJva2U6I2U4YTMzZDtzdHJva2Utd2lkdGg6MS41fQogICAgICAubG9jYWx7ZmlsbDojZjNmNGZmO3N0cm9rZTojN2M4M2RiO3N0cm9rZS13aWR0aDoxLjV9CiAgICAgIC52cGN7ZmlsbDojZjRmYmY3O3N0cm9rZTojM2FhNzZkO3N0cm9rZS13aWR0aDoxLjU7c3Ryb2tlLWRhc2hhcnJheTo2IDR9CiAgICAgIC5jb2Rle2ZpbGw6I2U2ZjNmYjtzdHJva2U6IzJiN2JiOTtzdHJva2Utd2lkdGg6MS41fQogICAgICAuc3Zje2ZpbGw6I2ZmZmZmZjtzdHJva2U6IzhhOTRhMztzdHJva2Utd2lkdGg6MS41fQogICAgICAudG9kb3tmaWxsOm5vbmU7c3Ryb2tlOiM5YWEzYWY7c3Ryb2tlLXdpZHRoOjEuNTtzdHJva2UtZGFzaGFycmF5OjYgNH0KICAgICAgLnRvZG8tdHh0e2ZpbGw6IzZiNzI4MH0KICAgICAgLmxpbmV7c3Ryb2tlOiMzNzQxNTE7c3Ryb2tlLXdpZHRoOjEuNjtmaWxsOm5vbmV9CiAgICAgIC5kYXNoe3N0cm9rZTojOWFhM2FmO3N0cm9rZS13aWR0aDoxLjY7ZmlsbDpub25lO3N0cm9rZS1kYXNoYXJyYXk6NiA0fQogICAgICAuaGVhZHtmaWxsOiMzNzQxNTF9CiAgICAgIC5oZWFkLWRhc2h7ZmlsbDojOWFhM2FmfQogICAgICAuYmFkZ2V7ZmlsbDojMWYyOTM3fQogICAgICAuYmFkZ2UtdHh0e2ZpbGw6I2ZmZmZmZjtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo3MDB9CiAgICAgIEBtZWRpYSAocHJlZmVycy1jb2xvci1zY2hlbWU6IGRhcmspewogICAgICAgIC5iZ3tmaWxsOiMwZjE3MjB9CiAgICAgICAgLnR4dHtmaWxsOiNlNWU3ZWJ9CiAgICAgICAgLnN7ZmlsbDojYTdiMGJkfQogICAgICAgIC5hd3N7ZmlsbDojMWQxYTE0O3N0cm9rZTojZDg5YTNjfQogICAgICAgIC5sb2NhbHtmaWxsOiMxODFhMzM7c3Ryb2tlOiM4Zjk2ZWF9CiAgICAgICAgLnZwY3tmaWxsOiMxMTIxMWE7c3Ryb2tlOiM0Y2JmODN9CiAgICAgICAgLmNvZGV7ZmlsbDojMTAyYTNkO3N0cm9rZTojNWFhOWUwfQogICAgICAgIC5zdmN7ZmlsbDojMTYxZDI3O3N0cm9rZTojN2Q4Nzk2fQogICAgICAgIC50b2Rve3N0cm9rZTojNmI3NDgwfQogICAgICAgIC50b2RvLXR4dHtmaWxsOiM4Yjk1YTN9CiAgICAgICAgLmxpbmV7c3Ryb2tlOiNjZmQ2ZGZ9CiAgICAgICAgLmRhc2h7c3Ryb2tlOiM2Yjc0ODB9CiAgICAgICAgLmhlYWR7ZmlsbDojY2ZkNmRmfQogICAgICAgIC5oZWFkLWRhc2h7ZmlsbDojNmI3NDgwfQogICAgICAgIC5iYWRnZXtmaWxsOiNlNWU3ZWJ9CiAgICAgICAgLmJhZGdlLXR4dHtmaWxsOiMxMTE4Mjd9CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8bWFya2VyIGlkPSJhcnJvdyIgdmlld0JveD0iMCAwIDEwIDEwIiByZWZYPSI5IiByZWZZPSI1IiBtYXJrZXJXaWR0aD0iNyIgbWFya2VySGVpZ2h0PSI3IiBvcmllbnQ9ImF1dG8tc3RhcnQtcmV2ZXJzZSI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDEwLDUgTDAsMTAgeiIgY2xhc3M9ImhlYWQiLz4KICAgIDwvbWFya2VyPgogICAgPG1hcmtlciBpZD0iYXJyb3ctZGFzaCIgdmlld0JveD0iMCAwIDEwIDEwIiByZWZYPSI5IiByZWZZPSI1IiBtYXJrZXJXaWR0aD0iNyIgbWFya2VySGVpZ2h0PSI3IiBvcmllbnQ9ImF1dG8tc3RhcnQtcmV2ZXJzZSI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDEwLDUgTDAsMTAgeiIgY2xhc3M9ImhlYWQtZGFzaCIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTEwMCIgaGVpZ2h0PSI2NDAiIHJ4PSIxNiIgY2xhc3M9ImJnIi8+CiAgPHRleHQgeD0iMjQiIHk9IjM0IiBjbGFzcz0idHh0IHRpdGxlIj7pu5LmvqTjgq/jgqjjgrnjg4ggQWdlbnRDb3JlIOaknOiovOODgeODo+ODg+ODiCDmp4vmiJDlm7M8L3RleHQ+CgogIDwhLS0g5pys55Wq44Gg44GR44Gu5YWl5Y+j77yI5LuK5Zue44Gv5L2c44KJ44Gq44GE77yJIC0tPgogIDxyZWN0IHg9IjI0IiB5PSI5MiIgd2lkdGg9IjIwMCIgaGVpZ2h0PSI2MCIgcng9IjEwIiBjbGFzcz0idG9kbyIvPgogIDx0ZXh0IHg9IjEyNCIgeT0iMTE5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGggdG9kby10eHQiPlNhbGVzZm9yY2U8L3RleHQ+CiAgPHRleHQgeD0iMTI0IiB5PSIxMzciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyB0b2RvLXR4dCI+5LuK5Zue44Gv5L2c44KJ44Gq44GEPC90ZXh0PgoKICA8IS0tIOODreODvOOCq+ODq1BDIC0tPgogIDxyZWN0IHg9IjI0IiB5PSIxNzAiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjkwIiByeD0iMTIiIGNsYXNzPSJsb2NhbCIvPgogIDx0ZXh0IHg9IjM2IiB5PSIxOTIiIGNsYXNzPSJ0eHQgZ3JvdXAiPuODreODvOOCq+ODq1BDPC90ZXh0PgogIDxyZWN0IHg9IjQwIiB5PSIyMDYiIHdpZHRoPSIxNjgiIGhlaWdodD0iODgiIHJ4PSIxMCIgY2xhc3M9ImNvZGUiLz4KICA8dGV4dCB4PSIxMjQiIHk9IjIzNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBoIj7jg4Hjg6Pjg4Pjg4jnlLvpnaI8L3RleHQ+CiAgPHRleHQgeD0iMTI0IiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+UHl0aG9uIC8gU3RyZWFtbGl0PC90ZXh0PgogIDx0ZXh0IHg9IjEyNCIgeT0iMjc0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMiPjEyNy4wLjAuMTo4NTAxPC90ZXh0PgogIDxyZWN0IHg9IjQwIiB5PSIzNTIiIHdpZHRoPSIxNjgiIGhlaWdodD0iODgiIHJ4PSIxMCIgY2xhc3M9InN2YyIvPgogIDx0ZXh0IHg9IjEyNCIgeT0iMzgyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGgiPuODneODvOODiOi7oumAgTwvdGV4dD4KICA8dGV4dCB4PSIxMjQiIHk9IjQwMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj5BV1MgQ0xJICsgU1NNIHBsdWdpbjwvdGV4dD4KICA8dGV4dCB4PSIxMjQiIHk9IjQyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj4xMjcuMC4wLjE6ODAwMDwvdGV4dD4KICA8bGluZSB4MT0iMTI0IiB5MT0iMjk0IiB4Mj0iMTI0IiB5Mj0iMzUwIiBjbGFzcz0ibGluZSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KCiAgPCEtLSBBV1MgLS0+CiAgPHJlY3QgeD0iMjQ4IiB5PSI1MiIgd2lkdGg9IjgyOCIgaGVpZ2h0PSI0NzYiIHJ4PSIxNCIgY2xhc3M9ImF3cyIvPgogIDx0ZXh0IHg9IjI2NCIgeT0iNzgiIGNsYXNzPSJ0eHQgZ3JvdXAiPkFXU++8iOadseS6rOODquODvOOCuOODp+ODsyBhcC1ub3J0aGVhc3QtMe+8iTwvdGV4dD4KCiAgPHJlY3QgeD0iMjY4IiB5PSI5MiIgd2lkdGg9IjE1MCIgaGVpZ2h0PSI2MCIgcng9IjEwIiBjbGFzcz0idG9kbyIvPgogIDx0ZXh0IHg9IjM0MyIgeT0iMTE5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGggdG9kby10eHQiPkFQSSBHYXRld2F5PC90ZXh0PgogIDx0ZXh0IHg9IjM0MyIgeT0iMTM3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMgdG9kby10eHQiPuS7iuWbnuOBr+S9nOOCieOBquOBhDwvdGV4dD4KCiAgPHJlY3QgeD0iMjY4IiB5PSIzNTIiIHdpZHRoPSIxNTAiIGhlaWdodD0iODgiIHJ4PSIxMCIgY2xhc3M9InN2YyIvPgogIDx0ZXh0IHg9IjM0MyIgeT0iMzgyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGgiPlNTTTwvdGV4dD4KICA8dGV4dCB4PSIzNDMiIHk9IjQwMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj5TZXNzaW9uIE1hbmFnZXI8L3RleHQ+CiAgPHRleHQgeD0iMzQzIiB5PSI0MjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+SUFNIOOBp+acrOS6uuOBoOOBkTwvdGV4dD4KCiAgPHJlY3QgeD0iNDQ2IiB5PSIyMzYiIHdpZHRoPSIyMDYiIGhlaWdodD0iMjM2IiByeD0iMTIiIGNsYXNzPSJ2cGMiLz4KICA8dGV4dCB4PSI0NjAiIHk9IjI1OCIgY2xhc3M9InR4dCBncm91cCI+44OH44OV44Kp44Or44OIVlBDPC90ZXh0PgogIDxyZWN0IHg9IjQ2MiIgeT0iMjg2IiB3aWR0aD0iMTc0IiBoZWlnaHQ9IjE3MCIgcng9IjEwIiBjbGFzcz0iY29kZSIvPgogIDx0ZXh0IHg9IjU0OSIgeT0iMzE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGgiPkVDMjwvdGV4dD4KICA8dGV4dCB4PSI1NDkiIHk9IjMzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj5QeXRob24gLyBGYXN0QVBJPC90ZXh0PgogIDx0ZXh0IHg9IjU0OSIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMiPuizquWVj+OCkuaIkOW9ouOBlzwvdGV4dD4KICA8dGV4dCB4PSI1NDkiIHk9IjM4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj7jg57jgrnjgr/jg7zjg6vjg7zjg6vjgpLku5jjgZHjgos8L3RleHQ+CiAgPHRleHQgeD0iNTQ5IiB5PSI0MDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+MTI3LjAuMC4xOjgwMDAg44Gn5b6F5Y+XPC90ZXh0PgogIDx0ZXh0IHg9IjU0OSIgeT0iNDI2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMiPuOCpOODs+ODkOOCpuODs+ODiSAwIOS7tjwvdGV4dD4KCiAgPHJlY3QgeD0iNjg0IiB5PSIzMDAiIHdpZHRoPSIxNzAiIGhlaWdodD0iMTQyIiByeD0iMTAiIGNsYXNzPSJjb2RlIi8+CiAgPHRleHQgeD0iNzY5IiB5PSIzMjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgaCI+QWdlbnRDb3JlIFJ1bnRpbWU8L3RleHQ+CiAgPHRleHQgeD0iNzY5IiB5PSIzNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+UHl0aG9uIC8gU3RyYW5kczwvdGV4dD4KICA8dGV4dCB4PSI3NjkiIHk9IjM3NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj7pu5LmvqTjgq/jgqjjgrnjg4g8L3RleHQ+CiAgPHRleHQgeD0iNzY5IiB5PSIzOTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+5qGI5YaF44Ko44O844K444Kn44Oz44OIPC90ZXh0PgogIDx0ZXh0IHg9Ijc2OSIgeT0iNDIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMiPkxMTSDjgYzpgZPlhbfjgpLpgbjjgpPjgafkvb/jgYY8L3RleHQ+CgogIDxyZWN0IHg9IjkxMiIgeT0iOTIiIHdpZHRoPSIxNDgiIGhlaWdodD0iNjAiIHJ4PSIxMCIgY2xhc3M9InN2YyIvPgogIDx0ZXh0IHg9Ijk4NiIgeT0iMTE5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGgiPkJlZHJvY2sg44GuIExMTTwvdGV4dD4KICA8dGV4dCB4PSI5ODYiIHk9IjEzNyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj7jg6Ljg4fjg6vmnKrlrprvvIjoqK3lrprjgafmjIflrprvvIk8L3RleHQ+CgogIDxyZWN0IHg9IjkxMiIgeT0iMTgyIiB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjYwIiByeD0iMTAiIGNsYXNzPSJzdmMiLz4KICA8dGV4dCB4PSI5ODYiIHk9IjIwOSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBoIj7jg4rjg6zjg4Pjgrjjg5njg7zjgrk8L3RleHQ+CiAgPHRleHQgeD0iOTg2IiB5PSIyMjciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+TWFuYWdlZCDlnovjg7tSZXRyaWV2ZTwvdGV4dD4KCiAgPHJlY3QgeD0iOTEyIiB5PSIyNjgiIHdpZHRoPSIxNDgiIGhlaWdodD0iNTIiIHJ4PSIxMCIgY2xhc3M9InN2YyIvPgogIDx0ZXh0IHg9Ijk4NiIgeT0iMjkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGgiPlMz77yI44Oe44OL44Ol44Ki44Or55So77yJPC90ZXh0PgogIDx0ZXh0IHg9Ijk4NiIgeT0iMzA4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMiPuODnuODi+ODpeOCouODqzEw6aCF55uuPC90ZXh0PgoKICA8cmVjdCB4PSI5MTIiIHk9IjM1MiIgd2lkdGg9IjE0OCIgaGVpZ2h0PSI2MCIgcng9IjEwIiBjbGFzcz0ic3ZjIi8+CiAgPHRleHQgeD0iOTg2IiB5PSIzNzkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgaCI+UzPvvIjmlofmm7jnlKjvvIk8L3RleHQ+CiAgPHRleHQgeD0iOTg2IiB5PSIzOTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+5L6d6aC85pu444O76LK344GE5Ye644GX44Oq44K544OIPC90ZXh0PgoKICA8cmVjdCB4PSI5MTIiIHk9IjQ0NiIgd2lkdGg9IjE0OCIgaGVpZ2h0PSI2MCIgcng9IjEwIiBjbGFzcz0iY29kZSIvPgogIDx0ZXh0IHg9Ijk4NiIgeT0iNDczIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGgiPkxhbWJkYe+8iFB5dGhvbu+8iTwvdGV4dD4KICA8dGV4dCB4PSI5ODYiIHk9IjQ5MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBzIj7jgq7jg6vjg4lBUEnvvIjku67vvIk8L3RleHQ+CgogIDwhLS0gQVdTIOOBruWkljog5aSW6YOoQVBJ77yI5Luu77yJIC0tPgogIDxyZWN0IHg9IjkxMiIgeT0iNTY4IiB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjUyIiByeD0iMTAiIGNsYXNzPSJ0b2RvIi8+CiAgPHRleHQgeD0iOTg2IiB5PSI1OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgaCB0b2RvLXR4dCI+5aSW6YOoQVBJ77yI5Luu77yJPC90ZXh0PgogIDx0ZXh0IHg9Ijk4NiIgeT0iNjA4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IHMgdG9kby10eHQiPuWun+mam+OBq+OBr+WRvOOBsOOBquOBhDwvdGV4dD4KCiAgPCEtLSDnn6LljbAgLS0+CiAgPGxpbmUgeDE9IjIyNCIgeTE9IjEyMiIgeDI9IjI2NiIgeTI9IjEyMiIgY2xhc3M9ImRhc2giIG1hcmtlci1lbmQ9InVybCgjYXJyb3ctZGFzaCkiLz4KICA8cGF0aCBkPSJNNDE4LDEyMiBINjAwIFYyODQiIGNsYXNzPSJkYXNoIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93LWRhc2gpIi8+CiAgPHRleHQgeD0iNTA5IiB5PSIxMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgcyI+5pys55Wq44Gg44GR44Gu6YGTPC90ZXh0PgogIDxsaW5lIHgxPSIyMDgiIHkxPSIzOTYiIHgyPSIyNjYiIHkyPSIzOTYiIGNsYXNzPSJsaW5lIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPgogIDxsaW5lIHgxPSI0MTgiIHkxPSIzOTYiIHgyPSI0NjAiIHkyPSIzOTYiIGNsYXNzPSJsaW5lIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPgogIDxsaW5lIHgxPSI2MzYiIHkxPSIzNzEiIHgyPSI2ODIiIHkyPSIzNzEiIGNsYXNzPSJsaW5lIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPgogIDxsaW5lIHgxPSI4NTQiIHkxPSIzNzEiIHgyPSI4ODAiIHkyPSIzNzEiIGNsYXNzPSJsaW5lIi8+CiAgPGxpbmUgeDE9Ijg4MCIgeTE9IjEyMiIgeDI9Ijg4MCIgeTI9IjQ3NiIgY2xhc3M9ImxpbmUiLz4KICA8bGluZSB4MT0iODgwIiB5MT0iMTIyIiB4Mj0iOTEwIiB5Mj0iMTIyIiBjbGFzcz0ibGluZSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICA8bGluZSB4MT0iODgwIiB5MT0iMjEyIiB4Mj0iOTEwIiB5Mj0iMjEyIiBjbGFzcz0ibGluZSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICA8bGluZSB4MT0iODgwIiB5MT0iMzgyIiB4Mj0iOTEwIiB5Mj0iMzgyIiBjbGFzcz0ibGluZSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICA8bGluZSB4MT0iODgwIiB5MT0iNDc2IiB4Mj0iOTEwIiB5Mj0iNDc2IiBjbGFzcz0ibGluZSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICA8bGluZSB4MT0iOTg2IiB5MT0iMjY4IiB4Mj0iOTg2IiB5Mj0iMjQ0IiBjbGFzcz0ibGluZSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICA8dGV4dCB4PSI5OTYiIHk9IjI2MCIgY2xhc3M9InR4dCBzIj7lkIzmnJ88L3RleHQ+CiAgPGxpbmUgeDE9Ijk4NiIgeTE9IjUwNiIgeDI9Ijk4NiIgeTI9IjU2NiIgY2xhc3M9ImRhc2giIG1hcmtlci1lbmQ9InVybCgjYXJyb3ctZGFzaCkiLz4KICA8dGV4dCB4PSI5OTYiIHk9IjU0NSIgY2xhc3M9InR4dCBzIj7lkbzjgpPjgaDjgbXjgoo8L3RleHQ+CgogIDwhLS0g55Wq5Y+377yI5omL6aCG5pu444CM6YCa5L+h44Gu5rWB44KM44CN44Go5ZCM44GY55Wq5Y+377yJIC0tPgogIDxjaXJjbGUgY3g9IjE0OCIgY3k9IjMyMiIgcj0iMTEiIGNsYXNzPSJiYWRnZSIvPjx0ZXh0IHg9IjE0OCIgeT0iMzI2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGJhZGdlLXR4dCI+MTwvdGV4dD4KICA8Y2lyY2xlIGN4PSIyMzgiIGN5PSIzNzgiIHI9IjExIiBjbGFzcz0iYmFkZ2UiLz48dGV4dCB4PSIyMzgiIHk9IjM4MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InR4dCBiYWRnZS10eHQiPjI8L3RleHQ+CiAgPGNpcmNsZSBjeD0iNjU5IiBjeT0iMzUzIiByPSIxMSIgY2xhc3M9ImJhZGdlIi8+PHRleHQgeD0iNjU5IiB5PSIzNTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgYmFkZ2UtdHh0Ij4zPC90ZXh0PgogIDxjaXJjbGUgY3g9Ijg2NyIgY3k9IjM1MCIgcj0iMTEiIGNsYXNzPSJiYWRnZSIvPjx0ZXh0IHg9Ijg2NyIgeT0iMzU0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idHh0IGJhZGdlLXR4dCI+NDwvdGV4dD4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9IjU1NiIgcj0iMTEiIGNsYXNzPSJiYWRnZSIvPjx0ZXh0IHg9IjM2IiB5PSI1NjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ0eHQgYmFkZ2UtdHh0Ij41PC90ZXh0PgogIDx0ZXh0IHg9IjU0IiB5PSI1NjEiIGNsYXNzPSJ0eHQgcyI+562U44GI44Gv5ZCM44GY6YGT44KS6YCG44Gr44Gf44Gp44Gj44Gm44CB44OB44Oj44OD44OI55S76Z2i44Gr6KGo56S644GV44KM44KLPC90ZXh0PgoKICA8IS0tIOWHoeS+iyAtLT4KICA8cmVjdCB4PSIyNCIgeT0iNTkwIiB3aWR0aD0iMjIiIGhlaWdodD0iMTQiIHJ4PSIzIiBjbGFzcz0iY29kZSIvPgogIDx0ZXh0IHg9IjU0IiB5PSI2MDIiIGNsYXNzPSJ0eHQgcyI+5LuK5Zue5L2c44KL44KC44Gu77yI44K944O844K544GC44KK77yJPC90ZXh0PgogIDxyZWN0IHg9IjI0MCIgeT0iNTkwIiB3aWR0aD0iMjIiIGhlaWdodD0iMTQiIHJ4PSIzIiBjbGFzcz0ic3ZjIi8+CiAgPHRleHQgeD0iMjcwIiB5PSI2MDIiIGNsYXNzPSJ0eHQgcyI+QVdTIOOBruOCteODvOODk+OCue+8iOeUu+mdouOBp+ioreWumu+8iTwvdGV4dD4KICA8cmVjdCB4PSI0NzAiIHk9IjU5MCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjE0IiByeD0iMyIgY2xhc3M9InRvZG8iLz4KICA8dGV4dCB4PSI1MDAiIHk9IjYwMiIgY2xhc3M9InR4dCBzIj7ku4rlm57jga/kvZzjgonjgarjgYTjg7vlkbzjgbDjgarjgYTvvIjnoLTnt5rvvIk8L3RleHQ+Cjwvc3ZnPgo="><figcaption>番号は「1-3 通信の流れ」と同じです</figcaption></figure>
+<h3 id="s-1-2-部品の役割">1-2 部品の役割</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>部品</th>
+<th>役割</th>
+<th>使う言語</th>
+<th>ソース</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>チャット画面</td>
+<td>ブラウザで質問を入力し、答えと「使った道具」を表示する</td>
+<td>Python（Streamlit）</td>
+<td><code>local_chat/chat_app.py</code></td>
+</tr>
+<tr>
+<td>ポート転送</td>
+<td>自分のPCの 127.0.0.1:8000 を、EC2 の 127.0.0.1:8000 につなぐ</td>
+<td>Windows バッチ（AWS CLI と Session Manager plugin）</td>
+<td><code>local_chat/start_tunnel.bat</code></td>
+</tr>
+<tr>
+<td>SSM Session Manager</td>
+<td>ポート転送と、ブラウザからの EC2 への接続を中継する。EC2 に受け口のポートを開けなくてよい</td>
+<td>—（AWS のサービス）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>EC2 受付API</td>
+<td>質問を成形し、マスタールールを付けて AgentCore を呼ぶ</td>
+<td>Python（FastAPI）</td>
+<td><code>ec2_app/</code></td>
+</tr>
+<tr>
+<td>AgentCore Runtime</td>
+<td>エージェントを動かす場所。LLM が質問を読んで、使う道具を選ぶ</td>
+<td>Python（Strands Agents）</td>
+<td><code>agent/</code></td>
+</tr>
+<tr>
+<td>Bedrock の LLM</td>
+<td>回答を作る・道具を選ぶ。モデルは未定で、設定ファイルで指定する</td>
+<td>—</td>
+<td><code>agent/config.json</code></td>
+</tr>
+<tr>
+<td>ナレッジベース（Managed 型）</td>
+<td>マニュアルを検索する</td>
+<td>—（AWS のサービス）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>S3（マニュアル用）</td>
+<td>ナレッジベースの元データ（マニュアル10項目）</td>
+<td>—</td>
+<td><code>data/manual/</code></td>
+</tr>
+<tr>
+<td>S3（文書用）</td>
+<td>エージェントが読む文書（依頼書・買い出しリストなど）</td>
+<td>—</td>
+<td><code>data/documents/</code></td>
+</tr>
+<tr>
+<td>Lambda ギルドAPI（仮）</td>
+<td>外部APIを呼んだふりをして、決まった形の答えを返す</td>
+<td>Python</td>
+<td><code>lambda/lambda_function.py</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s-1-3-通信の流れ-図の番号と同じ">1-3 通信の流れ（図の番号と同じ）</h3>
+<ol>
+<li>チャット画面で質問すると、チャット画面が <code>http://127.0.0.1:8000/chat</code> に質問を送る</li>
+<li>ポート転送（Session Manager plugin）が、その通信を SSM 経由で EC2 の 127.0.0.1:8000 に届ける。EC2 側でポートを開ける必要はない</li>
+<li>EC2 の受付API が質問を成形し、マスタールールを付けて AgentCore Runtime を呼ぶ（<code>InvokeAgentRuntime</code>。EC2 の IAM ロールの権限で呼ぶ）</li>
+<li>エージェントが LLM に考えさせ、必要な道具を使う<ul>
+<li>マニュアル検索 → ナレッジベース（Retrieve）</li>
+<li>文書の一覧・読み取り → S3（文書用）</li>
+<li>在庫確認・依頼の登録・状況確認 → Lambda（ギルドAPI・仮）</li>
+</ul>
+</li>
+<li>答えは同じ道を逆にたどって、チャット画面に表示される</li>
+</ol>
+<h3 id="s-1-4-権限の一覧-誰が-何に-何を許可されるか">1-4 権限の一覧（誰が・何に・何を許可されるか）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>誰が</th>
+<th>何に</th>
+<th>何を許可されるか</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ローカル用 IAM ユーザー <code>kq-chat-local</code></td>
+<td>EC2 <code>kq-chat-ec2</code></td>
+<td>ポート転送のセッションを始める（<code>ssm:StartSession</code>。シェルには入れない）</td>
+</tr>
+<tr>
+<td>同上</td>
+<td>自分のセッション</td>
+<td>自分のセッションの終了・再開（<code>ssm:TerminateSession</code> など）</td>
+</tr>
+<tr>
+<td>EC2 の IAM ロール <code>kq-ec2-role</code></td>
+<td>SSM</td>
+<td>SSM に登録され、セッションを受ける（AWS 管理ポリシー <code>AmazonSSMManagedInstanceCore</code>）</td>
+</tr>
+<tr>
+<td>同上</td>
+<td>AgentCore Runtime <code>kq_agent</code></td>
+<td>エージェントを呼ぶ（<code>bedrock-agentcore:InvokeAgentRuntime</code>）</td>
+</tr>
+<tr>
+<td>エージェントの実行ロール</td>
+<td>Bedrock の LLM</td>
+<td>モデルを呼ぶ（<code>bedrock:InvokeModel</code> など）</td>
+</tr>
+<tr>
+<td>同上</td>
+<td>ナレッジベース <code>kq-manual-kb</code></td>
+<td>検索する（<code>bedrock:Retrieve</code>）</td>
+</tr>
+<tr>
+<td>同上</td>
+<td>S3 <code>kq-docs-…</code> の <code>documents/</code></td>
+<td>一覧を見る・読む（<code>s3:ListBucket</code>・<code>s3:GetObject</code>）</td>
+</tr>
+<tr>
+<td>同上</td>
+<td>Lambda <code>kq-guild-api-mock</code></td>
+<td>呼ぶ（<code>lambda:InvokeFunction</code>）</td>
+</tr>
+<tr>
+<td>ナレッジベースのサービスロール（自動作成）</td>
+<td>S3 <code>kq-manual-…</code></td>
+<td>マニュアルを読む</td>
+</tr>
+<tr>
+<td>Lambda の実行ロール（自動作成）</td>
+<td>CloudWatch Logs</td>
+<td>ログを書く</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s-1-5-作るものの名前-早見表">1-5 作るものの名前（早見表）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>種類</th>
+<th>名前</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S3（マニュアル用）</td>
+<td><code>kq-manual-ACCOUNT_ID</code></td>
+</tr>
+<tr>
+<td>S3（文書用）</td>
+<td><code>kq-docs-ACCOUNT_ID</code>（中に <code>documents/</code> フォルダ）</td>
+</tr>
+<tr>
+<td>ナレッジベース</td>
+<td><code>kq-manual-kb</code>（データソース <code>kq-manual-s3</code>）</td>
+</tr>
+<tr>
+<td>Lambda</td>
+<td><code>kq-guild-api-mock</code></td>
+</tr>
+<tr>
+<td>AgentCore Runtime</td>
+<td><code>kq_agent</code>（ハイフンは使えないので <code>_</code>）</td>
+</tr>
+<tr>
+<td>EC2 用 IAM ロール</td>
+<td><code>kq-ec2-role</code></td>
+</tr>
+<tr>
+<td>EC2</td>
+<td><code>kq-chat-ec2</code>（セキュリティグループ <code>kq-chat-sg</code>）</td>
+</tr>
+<tr>
+<td>ローカル用 IAM ユーザー</td>
+<td><code>kq-chat-local</code></td>
+</tr>
+<tr>
+<td>AWS CLI のプロファイル</td>
+<td><code>kq-chat</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s-1-6-ソースの置き場所">1-6 ソースの置き場所</h3>
+<div class="highlight"><pre><span></span><code>agentcore-chat-lab/
+├── docs/            手順書と構成図
+├── local_chat/      ローカルPC: チャット画面とポート転送
+├── ec2_app/         EC2: 受付API・マスタールール・常駐の設定
+├── agent/           AgentCore Runtime: エージェントと zip を作るスクリプト
+├── lambda/          Lambda: ギルドAPI（仮）
+├── data/manual/     S3（マニュアル用）に入れる10ファイル
+├── data/documents/  S3（文書用）の documents/ に入れる3ファイル
+├── iam/             貼り付けて使う IAM ポリシー
+└── tests/           AWS を使わないテスト
+</code></pre></div>
+<hr />
+<h2 id="s-2-事前準備">2. 事前準備</h2>
+<h3 id="s-2-1-aws-コンソールにサインインして-東京リージョンにする">2-1 AWS コンソールにサインインして、東京リージョンにする</h3>
+<ol>
+<li>AWS マネジメントコンソールにサインインします。ルートユーザーではなく、管理者の権限を持つ IAM ユーザー（または IAM Identity Center のユーザー）を使うのがおすすめです</li>
+<li>画面右上のリージョン名をクリックし、<strong>Asia Pacific (Tokyo) ap-northeast-1</strong>（アジアパシフィック (東京)）を選びます</li>
+<li>この手順書の作業はすべて東京リージョンで行います。途中で画面右上が「東京」になっているか、ときどき確かめてください</li>
+</ol>
+<h3 id="s-2-2-アカウントidを控える">2-2 アカウントIDを控える</h3>
+<ol>
+<li>画面右上のアカウント名をクリックします</li>
+<li><strong>Account ID</strong>（アカウント ID）の12桁の数字をコピーして、0-4 の表に控えます</li>
+</ol>
+<h3 id="s-2-3-ローカルpc-windows-に道具を入れる">2-3 ローカルPC（Windows）に道具を入れる</h3>
+<p>コマンドは「ターミナル」（PowerShell かコマンドプロンプト）で実行します。インストールのあとは、<strong>ターミナルを開き直して</strong>から確認コマンドを打ってください。</p>
+<ol>
+<li><strong>Python 3.10 以上</strong><ul>
+<li>https://www.python.org/downloads/ からインストールします。インストール画面の「Add python.exe to PATH」にチェックを入れます</li>
+<li>確認: <code>python --version</code></li>
+</ul>
+</li>
+<li><strong>uv</strong>（AgentCore に上げる zip を作るときに使います）<ul>
+<li><code>python -m pip install uv</code></li>
+<li>確認: <code>python -m uv --version</code></li>
+</ul>
+</li>
+<li><strong>AWS CLI v2</strong><ul>
+<li>https://awscli.amazonaws.com/AWSCLIV2.msi をダウンロードして実行します（または <code>msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi</code>）</li>
+<li>確認: <code>aws --version</code>（<code>aws-cli/2.</code> で始まる表示が出れば OK）</li>
+</ul>
+</li>
+<li><strong>Session Manager plugin</strong><ul>
+<li>https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe をダウンロードして実行します（管理者の権限が要ります）</li>
+<li>確認: <code>session-manager-plugin</code></li>
+<li>「The Session Manager plugin is installed successfully. Use the AWS CLI to start a session.」と出れば OK</li>
+</ul>
+</li>
+</ol>
+<h3 id="s-2-4-使うモデルを決めて-モデルidを控える">2-4 使うモデルを決めて、モデルIDを控える</h3>
+<p>モデルは決め打ちしていません。ここで選んだものを 6章で設定します。</p>
+<blockquote>
+<p><strong>おすすめのモデル（個人の検証用なら）</strong>: <strong>Amazon Nova 2 Lite</strong> を推奨します。安い方のモデルで、道具の呼び出し（tool use）に対応し、Anthropic のモデルのような初回のフォームも要りません。公式ドキュメントに載っている推論プロファイルIDは <code>global.amazon.nova-2-lite-v1:0</code> です（東京から使えるかは、下の手順4で確かめてください<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span>）。道具をうまく使ってくれないと感じたら、少し高めの Claude Haiku 4.5（例: <code>jp.anthropic.claude-haiku-4-5-20251001-v1:0</code>）に替えてください。料金の金額は公式の料金ページで確認してください。</p>
+<p><strong>なぜ Bedrock の画面を開くのか</strong>: AgentCore はエージェントを動かす場所で、AI モデル（LLM）そのものは持っていません。エージェントは Bedrock の LLM を呼んで考えます。そのため、ここでは Bedrock の画面で「使うモデルを選んでIDを控える」ことだけをします。古い「Agents」の画面は開きません。</p>
+</blockquote>
+<ol>
+<li>画面上の検索窓に「Bedrock」と入れて、<strong>Amazon Bedrock</strong> を開きます</li>
+<li>左のメニューの <strong>Model catalog</strong>（モデルカタログ）を開き、使いたいモデルを選びます<ul>
+<li>エージェントが道具を呼ぶため、<strong>道具の呼び出し（Tool use）に対応したモデル</strong>を選んでください<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span><span class="check-note">モデルごとの対応は公式の「Converse API の対応モデルと機能」の表で確認</span></li>
+</ul>
+</li>
+<li>モデルの画面から <strong>Open in playground</strong>（プレイグラウンドで開く）を選び、「こんにちは」などを1回送ってみます<ul>
+<li>Bedrock のサーバーレスのモデルは、初めて呼んだときに使えるようになります（AWS Marketplace の購読が自動で行われるものがあります）。ここで管理者のユーザーで1回呼んでおくと、あとでエージェントから呼ぶときにつまずきにくくなります</li>
+<li>Anthropic のモデルのうち Claude Opus 4.7 より前のものは、初回に利用目的のフォーム（<strong>Submit use case details</strong>）の提出が必要です。画面の案内に従ってください</li>
+</ul>
+</li>
+<li>モデルIDを控えます<ul>
+<li>東京から呼ぶとき、多くのモデルは「推論プロファイルID」（<code>jp.</code> <code>apac.</code> <code>global.</code> などで始まるID）で呼びます。左のメニューの「推論」の下にある <strong>Inference profiles</strong>（推論プロファイル）の一覧で、選んだモデルの <strong>推論プロファイルID</strong> を控えます（2026-11-20 に実際の画面で確認。検索窓に <code>nova-2-lite</code> などと入れると早いです）。<code>jp.</code> は日本国内だけで処理、<code>global.</code> は世界中のリージョンで処理するプロファイルです</li>
+<li>推論プロファイルがなく東京で直接呼べるモデルは、モデルの画面に出ている <strong>Model ID</strong> を使います</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="s-3-s3-バケットを2つ作り-ファイルを入れる">3. S3: バケットを2つ作り、ファイルを入れる</h2>
+<h3 id="s-3-1-マニュアル用バケット">3-1 マニュアル用バケット</h3>
+<ol>
+<li>検索窓に「S3」と入れて <strong>S3</strong> を開きます</li>
+<li>左のメニューの <strong>General purpose buckets</strong>（汎用バケット）で <strong>Create bucket</strong>（バケットを作成）を押します</li>
+<li>
+<p>次のように入れます。ほかは初期値のままです</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bucket type</strong>（バケットタイプ）</td>
+<td><strong>General purpose</strong>（汎用）</td>
+</tr>
+<tr>
+<td><strong>Bucket namespace</strong>（バケット名前空間）</td>
+<td>初期値の <strong>Global namespace</strong>（グローバル名前空間）のまま。IAM ポリシーをこの前提で書いているため</td>
+</tr>
+<tr>
+<td><strong>Bucket name</strong>（バケット名）</td>
+<td><code>kq-manual-</code> の後ろに自分の12桁のアカウントID（例: <code>kq-manual-123456789012</code>）。<code>ACCOUNT_ID</code> の文字はそのまま入れない。使えるのは英小文字・数字・ハイフンだけ</td>
+</tr>
+<tr>
+<td><strong>Object Ownership</strong>（オブジェクト所有者）</td>
+<td><strong>ACLs disabled</strong>（ACL 無効）のまま</td>
+</tr>
+<tr>
+<td><strong>Block all public access</strong>（パブリックアクセスをすべてブロック）</td>
+<td>チェックを入れたまま</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p>一番下の <strong>Create bucket</strong>（バケットを作成）を押します</p>
+</li>
+<li>一覧からできたバケット名を押し、<strong>Upload</strong>（アップロード）→ <strong>Add files</strong>（ファイルを追加）で、<code>data/manual/</code> の10ファイル（<code>01-overview.md</code> 〜 <code>10-faq.md</code>）を選びます</li>
+<li>一番下の <strong>Upload</strong>（アップロード）を押します。終わったら <strong>Close</strong>（閉じる）</li>
+<li>確認: <strong>Objects</strong>（オブジェクト）タブに10ファイルが並んでいれば OK</li>
+</ol>
+<h3 id="s-3-2-文書用バケット">3-2 文書用バケット</h3>
+<ol>
+<li>3-1 と同じ手順で、バケット名 <code>kq-docs-ACCOUNT_ID</code> を作ります</li>
+<li>できたバケットを開き、<strong>Create folder</strong>（フォルダの作成）→ フォルダ名 <code>documents</code> → <strong>Create folder</strong>（フォルダの作成）</li>
+<li><code>documents/</code> を開き、<strong>Upload</strong>（アップロード）→ <strong>Add files</strong>（ファイルを追加）で <code>data/documents/</code> の3ファイル（<code>irai-001.md</code>・<code>kaidashi-list.md</code>・<code>test-ignore-rules.md</code>）を選んで <strong>Upload</strong>（アップロード）</li>
+<li>確認: <code>documents/</code> の中に3ファイルがあれば OK（バケットの一番上ではなく <code>documents/</code> の中に置くこと）</li>
+</ol>
+<hr />
+<h2 id="s-4-ナレッジベース-managed-型-を作る">4. ナレッジベース（Managed 型）を作る</h2>
+<p>Managed 型は、ベクトルDBの用意や埋め込みモデルの選択が要らない型です。公式ドキュメントでは「Amazon Bedrock AgentCore」の画面の中から作る手順になっています。</p>
+<h3 id="s-4-1-作成">4-1 作成</h3>
+<ol>
+<li>検索窓に「AgentCore」と入れて <strong>Amazon Bedrock AgentCore</strong> を開きます</li>
+<li>左のメニューの <strong>コネクター</strong>（Connectors）の下にある <strong>ナレッジベース (KB)</strong> を開きます（2026-11-20 に実際の画面で確認。公式ドキュメントでは「Built-in tools（組み込みツール）」と書かれていますが、今の画面では「コネクター」です）<ul>
+<li><span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span>見つからないときは、Amazon Bedrock の左のメニューの <strong>Knowledge bases</strong>（ナレッジベース）から作成を始め、Managed 型を選べるか確かめてください</li>
+</ul>
+</li>
+<li><strong>マネージド KB を作成</strong>（Create Managed Knowledge Base）を押します（2026-11-20 の画面で確認）</li>
+<li><strong>Knowledge Base details</strong>（ナレッジベースの詳細）<ul>
+<li><strong>KB 名</strong>: <code>kq-manual-kb</code></li>
+<li><strong>Additional configurations</strong>（追加設定）を開いた場合も、次の初期値のままにします<ul>
+<li>埋め込みモデルの種類: <strong>Managed</strong>（マネージド）（作ったあとで変えられません）</li>
+<li>IAM: <strong>Create and use a new service role</strong>（新しいサービスロールの作成と使用）</li>
+<li>暗号化: 初期値（AWS managed key）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Data source</strong>（データソース）<ul>
+<li>データソース名: <code>kq-manual-s3</code>（最初から <code>knowledge-base-quick-start-…</code> という名前が入っているので書き換える）</li>
+<li>種類: <strong>Amazon S3</strong></li>
+<li>データソースの場所: <strong>この AWS アカウント</strong>（This AWS account）</li>
+<li>S3 の URI: 右の <strong>S3 を参照</strong>（Browse S3）を押して、<strong>マニュアル用</strong>の <code>kq-manual-…</code> を選び、決定します（文書用の <code>kq-docs-…</code> と間違えない）</li>
+<li>「追加設定 - オプション」と「Access control list」は何も変えない</li>
+</ul>
+</li>
+<li><strong>Content parsing and chunking</strong>（コンテンツの解析とチャンキング）と <strong>Advanced configurations</strong>（詳細設定）は初期値のまま（解析は Managed parser、分け方は Default chunking）</li>
+<li>一番下の <strong>Create Knowledge Base</strong>（ナレッジベースの作成）を押します。できあがるまで2〜5分ほど待ちます</li>
+</ol>
+<h3 id="s-4-2-同期-マニュアルを取り込む">4-2 同期（マニュアルを取り込む）</h3>
+<blockquote>
+<p>作成すると、同期が<strong>自動で始まります</strong>（2026-11-20 の画面で確認）。上に「データソースを同期中」と出て、データソースのステータスが「同期中」なら、下の手順2は飛ばして、終わるまで待つだけで OK です。データソース名を初期値のままにした場合も、動きは変わりません。</p>
+</blockquote>
+<ol>
+<li>作ったナレッジベース <code>kq-manual-kb</code> を開きます</li>
+<li><strong>Data source</strong>（データソース）の欄で <code>kq-manual-s3</code> を選び、<strong>Sync</strong>（同期）を押します</li>
+<li>緑の「終わった」というお知らせが出るまで待ちます。データソースを選ぶと <strong>Sync history</strong>（同期の履歴）で結果を見られます。失敗したファイルがあると <strong>View warnings</strong> で理由が見られます</li>
+</ol>
+<h3 id="s-4-3-ナレッジベースidを控える">4-3 ナレッジベースIDを控える</h3>
+<ul>
+<li>ナレッジベースの詳細に出ている <strong>Knowledge Base ID</strong>（10文字の英数字）をコピーして、0-4 の表に控えます</li>
+</ul>
+<h3 id="s-4-4-画面で検索を試す">4-4 画面で検索を試す</h3>
+<ol>
+<li>ナレッジベース (KB) の一覧で <code>kq-manual-kb</code> の左端にチェックを入れ、一覧の右上の <strong>テスト</strong> を押します（ナレッジベースを選ぶまでは灰色で押せません）</li>
+<li>「ナレッジベース (KB) をテスト」の画面の左側、<strong>取得と応答生成</strong> で <strong>標準検索のみ</strong> を選びます（2026-11-20 の画面で確認）<ul>
+<li>今回のエージェントが使う検索（Retrieve）と同じ動きです</li>
+<li>初期値の「回答生成を使用したエージェント型検索」は、裏でモデル（Claude Sonnet 4.6 など）も動くため、そのぶん料金がかかります</li>
+<li>「回答生成を使用した標準検索」はマネージド KB では選べません（RetrieveAndGenerate が使えないため）</li>
+</ul>
+</li>
+<li>右側の <strong>テスト</strong> の一番下の入力欄に「薬師は何ができる？」と入れて実行します</li>
+<li><code>03-jobs.md</code> の内容が出れば OK。右上の <strong>詳細</strong> を入れると、取ってきたファイルが見られます</li>
+</ol>
+<hr />
+<h2 id="s-5-lambda-ギルドapi-仮-を作る">5. Lambda（ギルドAPI・仮）を作る</h2>
+<h3 id="s-5-1-関数を作る">5-1 関数を作る</h3>
+<ol>
+<li>検索窓に「Lambda」と入れて <strong>Lambda</strong> を開きます</li>
+<li><strong>Create an Event Function</strong>（または <strong>Create function</strong> / 関数の作成）を押します<ul>
+<li>2026-11-20 の画面では、初めて開くと黒い紹介ページが出て、そこの <strong>Create an Event Function</strong> が通常の関数の作成ボタンです。下にある Node.js の練習用コードは触らなくて OK</li>
+</ul>
+</li>
+<li>
+<p>次のように入れます</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>作り方</td>
+<td><strong>一から作成</strong>（Author from scratch）</td>
+</tr>
+<tr>
+<td><strong>関数名</strong></td>
+<td><code>kq-guild-api-mock</code></td>
+</tr>
+<tr>
+<td><strong>ランタイムソース</strong></td>
+<td><strong>AWS マネージドランタイム</strong> のまま</td>
+</tr>
+<tr>
+<td><strong>ランタイム</strong></td>
+<td>初期値の Node.js から <strong>Python 3.13</strong> に変える（3.14 でも動きます）</td>
+</tr>
+<tr>
+<td><strong>カスタム設定</strong>（永続実行・EC2 キャパシティプロバイダー）</td>
+<td>2つともオフのまま</td>
+</tr>
+<tr>
+<td><strong>その他の設定</strong></td>
+<td>開かなくて OK（アーキテクチャ x86_64、実行ロールは CloudWatch Logs に書ける基本のロールが自動で作られる）</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p>右下の <strong>Create Event Function</strong>（関数の作成）を押します</p>
+</li>
+</ol>
+<h3 id="s-5-2-コードを入れる">5-2 コードを入れる</h3>
+<ol>
+<li>作成すると「Getting started」の小窓が出ることがあります（2026-11-20 に確認）。右下の <strong>閉じる</strong> で閉じます</li>
+<li>下のエディタの左の一覧（EXPLORER）で <code>lambda_function.py</code> を開きます</li>
+<li>中身をすべて消して（<code>Ctrl + A</code> → <code>Delete</code>）、このリポジトリの <code>lambda/lambda_function.py</code> の中身をすべて貼り付けます</li>
+<li>左側の青い <strong>Deploy (Ctrl+Shift+U)</strong> を押します。下の表示が「Lambda Deployed」などになれば OK</li>
+</ol>
+<h3 id="s-5-3-テストする">5-3 テストする</h3>
+<ol>
+<li>エディタの左下の <strong>TEST EVENTS</strong> にある <strong>Create new test event</strong>（または上の <strong>テスト</strong> タブの <strong>新しいイベントを作成</strong>）を選びます</li>
+<li>
+<p><strong>Event name</strong>（イベント名）に <code>stock-yakusou</code>、イベントの JSON に次を入れて <strong>Save</strong>（保存）</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"check_item_stock"</span><span class="p">,</span><span class="w"> </span><span class="nt">"params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"item_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"やくそう"</span><span class="p">}}</span>
+</code></pre></div>
+</li>
+<li>
+<p>青い <strong>Test (Ctrl+Shift+I)</strong> を押します。結果に <code>"ok": true</code> と <code>"stock": 12</code> が出れば OK</p>
+</li>
+<li>
+<p>ほかの操作も試せます（任意）</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"register_quest"</span><span class="p">,</span><span class="w"> </span><span class="nt">"params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"テストの依頼"</span><span class="p">,</span><span class="w"> </span><span class="nt">"rank"</span><span class="p">:</span><span class="w"> </span><span class="s2">"銅"</span><span class="p">,</span><span class="w"> </span><span class="nt">"reward_gold"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="nt">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"黒澤村"</span><span class="p">,</span><span class="w"> </span><span class="nt">"requester"</span><span class="p">:</span><span class="w"> </span><span class="s2">"テスト"</span><span class="p">}}</span>
+</code></pre></div>
+</li>
+</ol>
+<hr />
+<h2 id="s-6-agentcore-runtime-にエージェントを置く">6. AgentCore Runtime にエージェントを置く</h2>
+<h3 id="s-6-1-設定ファイル-config-json-を書く">6-1 設定ファイル（config.json）を書く</h3>
+<p><code>agent/config.json</code> をメモ帳か VS Code で開き、次の3つを書きます（ほかはそのままで OK）。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>書く値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MODEL_ID</code></td>
+<td>2-4 で控えたモデルID（推論プロファイルID）</td>
+</tr>
+<tr>
+<td><code>KB_ID</code></td>
+<td>4-3 で控えたナレッジベースID</td>
+</tr>
+<tr>
+<td><code>DOCS_BUCKET</code></td>
+<td><code>kq-docs-ACCOUNT_ID</code>（文書用バケット名）</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>昔作った custom 型のナレッジベースを使う場合は、<code>KB_ID</code> をそのIDにし、<code>KB_TYPE</code> を <code>custom</code> にします（検索の設定が <code>vectorSearchConfiguration</code> に切り替わります）</li>
+<li>あとでモデルを変えるときは、<code>MODEL_ID</code> を書き換えて 6-2 からやり直します</li>
+</ul>
+<h3 id="s-6-2-zip-を作る">6-2 zip を作る</h3>
+<p>AgentCore Runtime は arm64 の Linux で動くので、部品は「Linux arm64 用」を集める必要があります。スクリプトがそれをやります。</p>
+<ol>
+<li>ターミナルで <code>agent</code> フォルダに移動します（例: リポジトリを <code>C:\work\kurosawaAgent</code> に置いた場合は <code>cd C:\work\kurosawaAgent\agent</code>）</li>
+<li><code>python build_zip.py</code> を実行します</li>
+<li>「できました: …\agent\dist\deployment_package.zip」と出れば OK（大きさは 30MB 前後です）<ul>
+<li>「config.json の次の項目が空です」と出たら、6-1 をやり直します</li>
+<li>「uv が見つかりません」と出たら、<code>python -m pip install uv</code> を実行してからやり直します</li>
+</ul>
+</li>
+</ol>
+<h3 id="s-6-3-コンソールでエージェントを置く-ランタイムを作成">6-3 コンソールでエージェントを置く（ランタイムを作成）</h3>
+<p>2026-11-20 の実際の画面で確認した手順です。</p>
+<ol>
+<li><strong>Amazon Bedrock AgentCore</strong> の左のメニューの <strong>エージェント</strong> を開きます</li>
+<li>右側の <strong>独自のコードを使用する</strong> の <strong>コードをデプロイ</strong> を押します<ul>
+<li>左の「マネージドハーネスを使用する」は、コードを使わない別の作り方なので選びません</li>
+</ul>
+</li>
+<li>
+<p>「<strong>ランタイムを作成</strong>」の画面が開きます。上から順に、次のように入れます</p>
+<p><strong>ランタイムの詳細</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>名前</strong></td>
+<td><code>kq_agent</code> と入力（ハイフンは使えない）</td>
+</tr>
+<tr>
+<td><strong>ランタイムプラットフォームバージョン</strong></td>
+<td><strong>V1</strong>（初期値）のまま。V2 は「V1 と異なる動作をすることがある」と画面にあるため</td>
+</tr>
+<tr>
+<td><strong>コンピューティングタイプ</strong></td>
+<td><strong>microVM</strong>（初期値）のまま</td>
+</tr>
+<tr>
+<td><strong>その他の詳細</strong></td>
+<td>開かなくて OK</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>エージェントソース</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ソースタイプ</strong></td>
+<td><strong>S3 ソース</strong>（初期値）のまま</td>
+</tr>
+<tr>
+<td><strong>S3 設定</strong></td>
+<td>初期値の「テンプレートから始める」から <strong>S3 にアップロード</strong> に変える（<strong>ここが大事</strong>。テンプレートのままだと、お試し用の別のエージェントが置かれる）</td>
+</tr>
+<tr>
+<td><strong>言語ランタイムバージョン</strong></td>
+<td><strong>Python 3.13</strong></td>
+</tr>
+<tr>
+<td><strong>保存先フォルダ</strong></td>
+<td>自動で入る <code>s3://bedrock-agentcore-runtime-ACCOUNT_ID-ap-northeast-1-…/</code> のまま（このバケットは13章の片付けで消す）</td>
+</tr>
+<tr>
+<td><strong>エージェントファイルを宛先フォルダにアップロード</strong></td>
+<td><strong>ファイルを選択</strong> を押して、6-2 で作った <code>agent\dist\deployment_package.zip</code> を選ぶ（<strong>zip を上げるのはここ</strong>）</td>
+</tr>
+<tr>
+<td><strong>エージェントエントリポイント</strong></td>
+<td><code>main.py</code> と入力（空欄なので必ず入れる）</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Permissions</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IAM アクセス許可</strong></td>
+<td><strong>デフォルトロールを作成</strong>（初期値）のまま</td>
+</tr>
+<tr>
+<td><strong>Role name</strong></td>
+<td>自動で入る <code>AmazonBedrockAgentCoreRuntimeDefaultServiceRole-…</code> のまま。<strong>この名前を控える</strong>（6-5 で使う）</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>インバウンド認証</strong>: 開かずに初期値（IAM）のまま</p>
+</li>
+<li>
+<p>一番下までスクロールして、作成のボタンを押します</p>
+</li>
+<li>状態が「準備完了（Ready など）」になるまで待ちます</li>
+</ol>
+<h3 id="s-6-4-runtime-arn-を控える">6-4 Runtime ARN を控える</h3>
+<ul>
+<li>エージェント <code>kq_agent</code> の画面の <strong>エンドポイント</strong> タブ（2026-11-20 の画面で確認）に、<strong>エンドポイント ARN</strong>（<code>arn:aws:bedrock-agentcore:ap-northeast-1:ACCOUNT_ID:runtime/kq_agent-XXXXXXXXXX/runtime-endpoint/DEFAULT</code>）が出ています。横のコピーのアイコンでコピーし、<strong>末尾の <code>/runtime-endpoint/DEFAULT</code> を取り除いたもの</strong>を Runtime ARN として 0-4 の表に控えます<ul>
+<li><code>kq_agent-</code> の後ろは大文字の I と小文字の l など見分けにくい文字があるので、手で打たずにコピーする</li>
+</ul>
+</li>
+<li>ARN の <code>runtime/</code> より後ろ（例: <code>kq_agent-XXXXXXXXXX</code>）が <strong>RUNTIME_ID</strong> です。<strong>RUNTIME_ID は ARN ではありません</strong>（7-2 で ARN をまるごと入れると、<code>runtime/arn:aws:…</code> のように二重になって失敗します）</li>
+</ul>
+<h3 id="s-6-5-実行ロールに道具の権限を足す">6-5 実行ロールに道具の権限を足す</h3>
+<p>コンソールが自動で作った実行ロールには、ナレッジベース・S3（文書用）・Lambda を使う権限がありません。足します。</p>
+<ol>
+<li>エージェントの詳細画面にある実行ロール（IAM ロール）の名前を押して、IAM の画面を開きます<ul>
+<li>見つからないときは、IAM の <strong>Roles</strong>（ロール）で <code>AgentCore</code> と検索します（公式ドキュメントでは、コンソールが作るロールの名前は <code>AmazonBedrockAgentCoreRuntimeDefaultServiceRole-…</code>）</li>
+</ul>
+</li>
+<li>ロールの画面の <strong>許可</strong> タブ（初期表示）の右上にある <strong>許可を追加 ▼</strong> を押し、<strong>インラインポリシーを作成</strong> を選びます（2026-11-20 の画面で確認）<ul>
+<li>一覧にもとからある <code>AmazonBedrockAgentCoreRuntimeExecutionPolicy_…</code> は、コンソールが自動で付けた基本の権限です。消さないでください</li>
+</ul>
+</li>
+<li>「アクセス許可を指定」の画面になります。<strong>ポリシーエディタ</strong> の右上の <strong>ビジュアル | JSON</strong> で <strong>JSON</strong> を押し（初期値はビジュアル）、エディタの中を <code>Ctrl + A</code> → <code>Delete</code> で消してから、<code>iam/agent-runtime-tools.json</code> の中身を貼り付けます（2026-11-20 の画面で確認）</li>
+<li>貼り付けた中の次の言葉を置き換えます<ul>
+<li><code>ACCOUNT_ID</code> → 自分のアカウントID（全部で5か所）</li>
+<li><code>KB_ID</code> → ナレッジベースID</li>
+</ul>
+</li>
+<li><strong>Next</strong>（次へ）→ <strong>Policy name</strong>（ポリシー名）に <code>kq-agent-tools</code> → <strong>Create policy</strong>（ポリシーの作成）</li>
+<li>一覧に <code>AmazonBedrockAgentCoreRuntimeExecutionPolicy_…</code> と <code>kq-agent-tools</code> の2つが並べば OK</li>
+</ol>
+<h3 id="s-6-6-コンソールでエージェントを試す">6-6 コンソールでエージェントを試す</h3>
+<ol>
+<li>エージェント <code>kq_agent</code> の画面の右上の青い <strong>エージェントをテスト</strong> を押します（2026-11-20 の画面で確認。ステータスとエンドポイントが「アクティブ」になってから）</li>
+<li>
+<p>入力欄に次を入れて実行します</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"prompt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"薬師は何ができる？"</span><span class="p">}</span>
+</code></pre></div>
+</li>
+<li>
+<p><code>"answer"</code> に薬師の説明、<code>"tools_used"</code> に <code>search_manual</code> が出れば OK</p>
+<ul>
+<li>ここでは EC2 を通さないので、マスタールールの代わりにエージェント内の予備のルールが使われ、<code>"warning"</code> が付きます。これは正常です</li>
+<li><code>AccessDeniedException</code> が出たら、1〜2分待ってからもう一度（権限が効くまで少しかかることがあります）。続くときは 12章へ</li>
+</ul>
+</li>
+<li>
+<p>余裕があれば次も試します</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"prompt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"文書の一覧を見せて"</span><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"prompt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"やくそうの在庫を調べて"</span><span class="p">}</span>
+</code></pre></div>
+</li>
+</ol>
+<hr />
+<h2 id="s-7-ec2-用の-iam-ロールを作る">7. EC2 用の IAM ロールを作る</h2>
+<h3 id="s-7-1-ロールを作る">7-1 ロールを作る</h3>
+<ol>
+<li>検索窓に「IAM」と入れて <strong>IAM</strong> を開き、左のメニューの <strong>Roles</strong>（ロール）→ <strong>Create role</strong>（ロールを作成）</li>
+<li><strong>Trusted entity type</strong>（信頼されたエンティティタイプ）は <strong>AWS service</strong>（AWS のサービス）、<strong>Use case</strong>（ユースケース）は <strong>EC2</strong> を選んで <strong>Next</strong>（次へ）</li>
+<li>許可の検索窓に <code>AmazonSSMManagedInstanceCore</code> と入れ、出てきたものにチェックを入れて <strong>Next</strong>（次へ）</li>
+<li><strong>Role name</strong>（ロール名）に <code>kq-ec2-role</code> と入れて <strong>Create role</strong>（ロールを作成）</li>
+</ol>
+<h3 id="s-7-2-agentcore-を呼ぶ権限を足す">7-2 AgentCore を呼ぶ権限を足す</h3>
+<ol>
+<li>ロールの一覧から <code>kq-ec2-role</code> を開きます</li>
+<li><strong>許可を追加 ▼</strong>（Add permissions）→ <strong>インラインポリシーを作成</strong> → ポリシーエディタ右上の <strong>ビジュアル | JSON</strong> で <strong>JSON</strong> を押す（初期値はビジュアル）</li>
+<li>
+<p>中身を消して <code>iam/ec2-role-invoke-agent.json</code> の中身を貼り付け、<code>ACCOUNT_ID</code> と <code>RUNTIME_ID</code> を置き換えます（どちらも2か所）</p>
+<ul>
+<li><code>RUNTIME_ID</code> に入れるのは <code>kq_agent-XXXXXXXXXX</code> の部分だけ（ARN をまるごと入れない）。置き換えたあとは次の形になります</li>
+</ul>
+<div class="highlight"><pre><span></span><code>"arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/kq_agent-XXXXXXXXXX",
+"arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/kq_agent-XXXXXXXXXX/*"
+</code></pre></div>
+<ul>
+<li>1つ目の行は Runtime そのもの、2つ目の行（最後が <code>/*</code>）は Runtime の入口（エンドポイント）です。公式の権限の一覧で、呼び出しには両方が必要とされています
+4. <strong>Next</strong>（次へ）→ ポリシー名 <code>kq-invoke-agent</code> → <strong>Create policy</strong>（ポリシーの作成）</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="s-8-ec2-を起動する">8. EC2 を起動する</h2>
+<h3 id="s-8-1-起動の設定">8-1 起動の設定</h3>
+<ol>
+<li>検索窓に「EC2」と入れて <strong>EC2</strong> を開き、<strong>Launch instance</strong>（インスタンスを起動）を押します</li>
+<li>
+<p>次のように入れます</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Name and tags</strong>（名前とタグ）</td>
+<td><code>kq-chat-ec2</code></td>
+</tr>
+<tr>
+<td><strong>Application and OS Images</strong>（アプリケーションおよび OS イメージ）</td>
+<td><strong>Quick Start</strong> の <strong>Amazon Linux</strong> → <strong>Amazon Linux 2023 AMI</strong>、アーキテクチャは <strong>64-bit (x86)</strong></td>
+</tr>
+<tr>
+<td><strong>Instance type</strong>（インスタンスタイプ）</td>
+<td>小さいもので十分（例: <code>t3.micro</code>）</td>
+</tr>
+<tr>
+<td><strong>Key pair (login)</strong>（キーペア (ログイン)）</td>
+<td><strong>Proceed without a key pair (Not recommended)</strong>（キーペアなしで続行 (推奨されません)）。SSM で入るのでキーは使いません</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Network settings</strong>（ネットワーク設定）の <strong>Edit</strong>（編集）を押して、次のようにします</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VPC</strong></td>
+<td><code>(default)</code> と付いているもの（デフォルトVPC）</td>
+</tr>
+<tr>
+<td><strong>Subnet</strong>（サブネット）</td>
+<td><strong>No preference</strong>（指定なし）。「サブネットが見つかりませんでした」と出たら、下の注意を見る</td>
+</tr>
+<tr>
+<td><strong>Auto-assign public IP</strong>（パブリック IP の自動割り当て）</td>
+<td><strong>Enable</strong>（有効化）</td>
+</tr>
+<tr>
+<td><strong>Firewall (security groups)</strong>（ファイアウォール (セキュリティグループ)）</td>
+<td><strong>Create security group</strong>（セキュリティグループを作成）</td>
+</tr>
+<tr>
+<td><strong>Security group name</strong>（セキュリティグループ名）</td>
+<td><code>kq-chat-sg</code></td>
+</tr>
+<tr>
+<td><strong>Description</strong>（説明）</td>
+<td><code>kq chat - no inbound rules</code>（英数字だけ使えます）</td>
+</tr>
+<tr>
+<td><strong>Inbound Security Group Rules</strong>（インバウンドセキュリティグループのルール）</td>
+<td>最初から入っている SSH のルールの <strong>Remove</strong>（削除）を押し、<strong>1つも残さない</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>「サブネットが見つかりませんでした」と出たとき</strong>（2026-11-20 に実際に発生）: デフォルトVPCの中のサブネットが消えています。画面上部の黒い帯の <strong><code>&gt;_</code>（CloudShell）</strong> を押して開き（リージョンは東京のまま）、<code>aws ec2 create-default-subnet --availability-zone ap-northeast-1a</code> を実行して作ります（2026-11-20 の画面では、VPC の「アクション」メニューにこの操作が出なかったため）。デフォルトサブネットはパブリックIPが自動で付き、インターネットへ出られるので SSM が使えます（ふつうの「サブネットを作成」では、この設定にならないので使わない）。作ったら起動画面のサブネットの <strong>↻</strong> を押して選びます</p>
+</blockquote>
+</li>
+<li>
+<p><strong>Configure storage</strong>（ストレージを設定）は初期値のまま</p>
+</li>
+<li>
+<p><strong>Advanced details</strong>（高度な詳細）を開き、次の2つを設定します</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IAM instance profile</strong>（IAM インスタンスプロフィール）</td>
+<td><code>kq-ec2-role</code></td>
+</tr>
+<tr>
+<td><strong>Metadata version</strong>（メタデータのバージョン）</td>
+<td><strong>V2 only (token required)</strong>（V2 のみ (トークンは必須)）</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p>右の <strong>Launch instance</strong>（インスタンスを起動）を押します</p>
+</li>
+</ol>
+<h3 id="s-8-2-起動を待つ">8-2 起動を待つ</h3>
+<ol>
+<li><strong>Instances</strong>（インスタンス）の一覧で <code>kq-chat-ec2</code> の <strong>Instance state</strong>（インスタンスの状態）が <strong>Running</strong>（実行中）になるまで待ちます</li>
+<li><strong>Status check</strong>（ステータスチェック）が「checks passed」（チェックに合格）になるまで待ちます（数分）</li>
+</ol>
+<h3 id="s-8-3-インスタンスidを控える">8-3 インスタンスIDを控える</h3>
+<ul>
+<li><code>kq-chat-ec2</code> を選んで、下に出る <strong>Instance ID</strong>（インスタンス ID、<code>i-</code> で始まる）を 0-4 の表に控えます</li>
+</ul>
+<h3 id="s-8-4-インバウンドが0件か確かめる">8-4 インバウンドが0件か確かめる</h3>
+<ul>
+<li><code>kq-chat-ec2</code> を選び、下の <strong>Security</strong>（セキュリティ）タブの <strong>Inbound rules</strong>（インバウンドルール）が空なら OK</li>
+</ul>
+<hr />
+<h2 id="s-9-ec2-に受付apiを入れる-ブラウザから-ssm-でつなぐ">9. EC2 に受付APIを入れる（ブラウザから SSM でつなぐ）</h2>
+<h3 id="s-9-1-ec2-につなぐ">9-1 EC2 につなぐ</h3>
+<ol>
+<li><strong>Instances</strong>（インスタンス）で <code>kq-chat-ec2</code> を選び、<strong>Connect</strong>（接続）を押します</li>
+<li><strong>Session Manager</strong> タブを選び、<strong>Connect</strong>（接続）を押します。黒い画面（<code>sh-5.2$</code> などと出る）が開きます<ul>
+<li><strong>Connect</strong> が押せないときは5〜10分待ってから開き直します。続くときは 12章へ</li>
+</ul>
+</li>
+</ol>
+<h3 id="s-9-2-作業の準備">9-2 作業の準備</h3>
+<p>次を1行ずつ貼り付けて Enter を押します。</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su<span class="w"> </span>-<span class="w"> </span>ec2-user
+<span class="nb">export</span><span class="w"> </span><span class="nv">LANG</span><span class="o">=</span>C.UTF-8
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/kq-chat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/kq-chat
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>python3.13<span class="w"> </span>python3.13-pip
+python3.13<span class="w"> </span>--version
+</code></pre></div>
+<ul>
+<li><code>Python 3.13.</code> で始まる表示が出れば OK</li>
+<li>「No match for argument」と出たら、<code>sudo dnf install -y python3.12 python3.12-pip</code> を試し、この章の <code>python3.13</code> をすべて <code>python3.12</code> に読み替えます<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span><span class="check-note">Amazon Linux 2023 のパッケージ名</span></li>
+</ul>
+<h3 id="s-9-3-ファイルを3つ作る-貼り付け">9-3 ファイルを3つ作る（貼り付け）</h3>
+<p>ファイルの中身は、VS Code などで開いてコピーします。次の形を3回くり返します。</p>
+<ol>
+<li>1行目（<code>cat &gt; … &lt;&lt;'EOF'</code>）を貼って Enter</li>
+<li>ファイルの中身をすべて貼り付ける</li>
+<li>最後に <code>EOF</code> と打って Enter（行の先頭に、<code>EOF</code> の3文字だけ）</li>
+</ol>
+<p><strong>requirements.txt</strong>（中身は <code>ec2_app/requirements.txt</code> と同じ3行。貼り付けを使わず、次の1行で作れます）</p>
+<div class="highlight"><pre><span></span><code><span class="nb">printf</span><span class="w"> </span><span class="s1">'fastapi==0.162.5\nuvicorn==0.54.0\nboto3==1.44.6\n'</span><span class="w"> </span>&gt;<span class="w"> </span>requirements.txt
+cat<span class="w"> </span>requirements.txt
+</code></pre></div>
+<p><strong>master_rules.md</strong>（中身は <code>ec2_app/master_rules.md</code>）</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>master_rules.md<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<span class="s">（ここに ec2_app/master_rules.md の中身を貼る）</span>
+<span class="s">EOF</span>
+</code></pre></div>
+<p><strong>app.py</strong>（中身は <code>ec2_app/app.py</code>）</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>app.py<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<span class="s">（ここに ec2_app/app.py の中身を貼る）</span>
+<span class="s">EOF</span>
+</code></pre></div>
+<p>できたか確かめます。</p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-l
+python3.13<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import ast; ast.parse(open('app.py', encoding='utf-8').read()); print('app.py OK')"</span>
+head<span class="w"> </span>-3<span class="w"> </span>master_rules.md
+</code></pre></div>
+<ul>
+<li><code>ls -l</code> に <code>app.py</code>・<code>master_rules.md</code>・<code>requirements.txt</code> の3つがあり、<code>app.py OK</code> と出て、<code>master_rules.md</code> の先頭が日本語で読めれば OK</li>
+<li>9-4 で「Could not open requirements file」と出たら、<code>requirements.txt</code> が作れていません（2026-11-20 に実際に発生）。上の <code>printf …</code> の1行をもう一度実行します</li>
+<li>貼り付けが崩れたときは、そのファイルの手順をもう一度やれば上書きされます</li>
+</ul>
+<h3 id="s-9-4-部品を入れる">9-4 部品を入れる</h3>
+<div class="highlight"><pre><span></span><code>python3.13<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</code></pre></div>
+<h3 id="s-9-5-設定ファイルを作る">9-5 設定ファイルを作る</h3>
+<p>1行目の <code>'…'</code> の中を、6-4 で控えた Runtime ARN に書き換えてから貼り付けます。</p>
+<div class="highlight"><pre><span></span><code><span class="nv">ARN</span><span class="o">=</span><span class="s1">'arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/kq_agent-XXXXXXXXXX'</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'AGENT_RUNTIME_ARN=%s\nAWS_REGION=ap-northeast-1\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ARN</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span>kq-chat.env
+cat<span class="w"> </span>kq-chat.env
+</code></pre></div>
+<h3 id="s-9-6-手で起動して試す">9-6 手で起動して試す</h3>
+<blockquote>
+<p><strong>セッションを開き直したときは、まず <code>sudo su - ec2-user</code> と <code>cd ~/kq-chat</code> をしてから</strong>進めます。開き直すとプロンプトが <code>sh-5.2$</code>（ssm-user）に戻り、ファイルのある場所からずれるため、「No such file or directory」になります（2026-11-20 に実際に発生）。プロンプトが <code>[ec2-user@… kq-chat]$</code> になっていれば正しい場所です</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su<span class="w"> </span>-<span class="w"> </span>ec2-user
+<span class="nb">cd</span><span class="w"> </span>~/kq-chat
+<span class="nb">set</span><span class="w"> </span>-a<span class="p">;</span><span class="w"> </span>.<span class="w"> </span>./kq-chat.env<span class="p">;</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>+a
+.venv/bin/uvicorn<span class="w"> </span>app:app<span class="w"> </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+</code></pre></div>
+<ul>
+<li><code>Uvicorn running on http://127.0.0.1:8000</code> と出れば起動しています。この画面はそのままにします</li>
+<li>もう1つ別のタブで 9-1 をくり返して EC2 につなぎ、次を実行します</li>
+</ul>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:8000/health<span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/chat<span class="w"> </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">'{"session_id":"kq-test-000000000000000000000000000001","message":"薬師は何ができる？"}'</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+</code></pre></div>
+<ul>
+<li>1つ目で <code>"agent_configured":true</code>、2つ目で <code>"answer"</code> に薬師の説明が出れば OK</li>
+<li>最初の画面に戻り、<code>Ctrl + C</code> で止めます</li>
+</ul>
+<h3 id="s-9-7-常駐させる-ec2-を再起動しても自動で動くようにする">9-7 常駐させる（EC2 を再起動しても自動で動くようにする）</h3>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/systemd/system/kq-chat.service<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<span class="s">（ここに ec2_app/kq-chat.service の中身を貼る）</span>
+<span class="s">EOF</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>kq-chat
+systemctl<span class="w"> </span>status<span class="w"> </span>kq-chat<span class="w"> </span>--no-pager
+curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:8000/health<span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+</code></pre></div>
+<ul>
+<li><code>active (running)</code> と出て、<code>/health</code> に答えが返れば OK</li>
+<li>ログを見るとき: <code>journalctl -u kq-chat -n 30 --no-pager</code></li>
+<li>マスタールールを直したいとき: <code>nano ~/kq-chat/master_rules.md</code>（保存すると、次の質問から効きます。再起動は要りません）</li>
+</ul>
+<h3 id="s-9-8-接続を閉じる">9-8 接続を閉じる</h3>
+<ul>
+<li>画面右上の <strong>Terminate</strong>（終了）を押すか、<code>exit</code> を2回打ちます</li>
+</ul>
+<hr />
+<h2 id="s-10-ローカルpc用の-iam-ユーザーを作る-ポート転送だけできる">10. ローカルPC用の IAM ユーザーを作る（ポート転送だけできる）</h2>
+<h3 id="s-10-1-ユーザーを作る">10-1 ユーザーを作る</h3>
+<ol>
+<li><strong>IAM</strong> の左のメニューの <strong>Users</strong>（ユーザー）→ <strong>Create user</strong>（ユーザーの作成）</li>
+<li><strong>User name</strong>（ユーザー名）に <code>kq-chat-local</code>。<strong>Provide user access to the AWS Management Console</strong>（AWS マネジメントコンソールへのユーザーアクセスを提供する）には <strong>チェックを入れません</strong> → <strong>Next</strong>（次へ）</li>
+<li><strong>Permissions options</strong>（許可のオプション）は <strong>Attach policies directly</strong>（ポリシーを直接アタッチする）のまま、何も選ばずに <strong>Next</strong>（次へ）</li>
+<li><strong>Create user</strong>（ユーザーの作成）</li>
+</ol>
+<h3 id="s-10-2-ポート転送だけの権限を付ける">10-2 ポート転送だけの権限を付ける</h3>
+<ol>
+<li><code>kq-chat-local</code> を開き、<strong>許可を追加 ▼</strong>（Add permissions）→ <strong>インラインポリシーを作成</strong> → ポリシーエディタ右上の <strong>ビジュアル | JSON</strong> で <strong>JSON</strong> を押す（初期値はビジュアル）</li>
+<li>中身を消して <code>iam/local-user-port-forward.json</code> の中身を貼り付け、<code>ACCOUNT_ID</code> と <code>INSTANCE_ID</code> を置き換えます</li>
+<li><strong>Next</strong>（次へ）→ ポリシー名 <code>kq-port-forward-only</code> → <strong>Create policy</strong>（ポリシーの作成）</li>
+</ol>
+<p>このポリシーで、このユーザーは「<code>kq-chat-ec2</code> へのポート転送」だけができます。<code>ssm:SessionDocumentAccessCheck</code> の条件で、ドキュメントを指定しない普通のシェル接続も封じています<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span><span class="check-note">この条件の働きは公式のサンプルを見つけられなかったため。もしポート転送が <code>AccessDenied</code> になるときは、12章を見てください</span></p>
+<h3 id="s-10-3-アクセスキーを作る">10-3 アクセスキーを作る</h3>
+<ol>
+<li><code>kq-chat-local</code> の <strong>Security credentials</strong>（セキュリティ認証情報）タブ → <strong>Access keys</strong>（アクセスキー）の <strong>Create access key</strong>（アクセスキーを作成）</li>
+<li><strong>Use case</strong>（ユースケース）は <strong>Command Line Interface (CLI)</strong>（コマンドラインインターフェイス (CLI)）。下の確認のチェックを入れて <strong>Next</strong>（次へ）</li>
+<li><strong>説明タグ値</strong> は空欄でも OK（入れるなら <code>kq chat local PC port forwarding</code> など）→ <strong>アクセスキーを作成</strong> → <strong>.csv ファイルをダウンロード</strong>（シークレットアクセスキーはこの画面でしか見られない）→ <strong>完了</strong><ul>
+<li>アクセスキーは他人に見せないでください。検証が終わったら 13章で消します</li>
+</ul>
+</li>
+</ol>
+<h3 id="s-10-4-自分のpcに設定する">10-4 自分のPCに設定する</h3>
+<p>ターミナルで次を実行し、聞かれた順に入れます。</p>
+<div class="highlight"><pre><span></span><code>aws configure --profile kq-chat
+</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>聞かれること</th>
+<th>入れる値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS Access Key ID</td>
+<td>.csv の Access key ID</td>
+</tr>
+<tr>
+<td>AWS Secret Access Key</td>
+<td>.csv の Secret access key</td>
+</tr>
+<tr>
+<td>Default region name</td>
+<td><code>ap-northeast-1</code></td>
+</tr>
+<tr>
+<td>Default output format</td>
+<td><code>json</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>「Configure AWS skills and the AWS MCP server for your AI coding agent(s)? [y/n/never]」と聞かれたら <strong><code>never</code></strong> と入れます（2026-11-20 に確認。AI のコーディング支援ツール向けの設定で、今回は使いません。<code>y</code> を選ぶとそのツールの設定ファイルが書き換わります）</li>
+</ul>
+<p>確認:</p>
+<div class="highlight"><pre><span></span><code>aws sts get-caller-identity --profile kq-chat
+</code></pre></div>
+<p><code>"Arn"</code> が <code>…:user/kq-chat-local</code> になっていれば OK</p>
+<hr />
+<h2 id="s-11-つないで動かす">11. つないで動かす</h2>
+<h3 id="s-11-1-ポート転送を始める">11-1 ポート転送を始める</h3>
+<ol>
+<li><code>local_chat/start_tunnel.bat</code> をメモ帳で開き、<code>set INSTANCE_ID=</code> の後ろを 8-3 のインスタンスIDに書き換えて保存します</li>
+<li><code>start_tunnel.bat</code> をダブルクリックします</li>
+<li>
+<p>次のような表示が出れば成功です。<strong>この画面は閉じずにそのまま</strong>にします</p>
+<div class="highlight"><pre><span></span><code>Starting session with SessionId: kq-chat-local-xxxxxxxxxxxx
+Port 8000 opened for sessionId kq-chat-local-xxxxxxxxxxxx.
+Waiting for connections...
+</code></pre></div>
+</li>
+<li>
+<p>ブラウザで http://127.0.0.1:8000/health を開き、<code>"agent_configured":true</code> が出れば EC2 までつながっています</p>
+</li>
+</ol>
+<h3 id="s-11-2-チャット画面を起動する">11-2 チャット画面を起動する</h3>
+<ol>
+<li><code>local_chat/start_chat.bat</code> をダブルクリックします（初回は部品のインストールで少し時間がかかります）</li>
+<li>ブラウザで http://127.0.0.1:8501 が開きます（開かないときは自分で開きます）</li>
+<li>左のメニューの <strong>接続を確認</strong> を押し、緑の「EC2 につながりました」が出れば準備完了です</li>
+</ol>
+<h3 id="s-11-3-質問して確かめる">11-3 質問して確かめる</h3>
+<p>LLM の答え方は毎回少し変わります。中身が合っていれば OK です。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>質問</th>
+<th>期待する結果</th>
+<th>使う道具</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>黒澤クエストはどんなゲーム？</td>
+<td>黒澤の国・澄み石・墨竜の説明。最後に「参考: …」</td>
+<td>search_manual</td>
+</tr>
+<tr>
+<td>薬師は何ができる？</td>
+<td>回復の術、「清め」、道具の回復量1.5倍</td>
+<td>search_manual</td>
+</tr>
+<tr>
+<td>今日の東京の天気は？</td>
+<td>「申し訳ありません。このチャットでは『黒澤クエスト』と…」と断る</td>
+<td>なし</td>
+</tr>
+<tr>
+<td>薬師の特徴と、Python でソートを書く方法を教えて</td>
+<td>薬師の部分だけ答え、Python の部分は答えられないと伝える</td>
+<td>search_manual</td>
+</tr>
+<tr>
+<td>黒澤クエストの発売日は？</td>
+<td>「マニュアルに載っていないため、わかりません」</td>
+<td>search_manual</td>
+</tr>
+<tr>
+<td>文書の一覧を見せて</td>
+<td><code>irai-001.md</code> など3件</td>
+<td>list_documents</td>
+</tr>
+<tr>
+<td>依頼書 irai-001.md を読んで、ギルドに登録して</td>
+<td>依頼番号（<code>KQ-日付-4文字</code>）と、仮のサービスの値であることの一言</td>
+<td>read_document, guild_register_quest</td>
+</tr>
+<tr>
+<td>さっき登録した依頼の状況は？</td>
+<td>「冒険者募集中」など3つのどれか</td>
+<td>guild_get_quest_status</td>
+</tr>
+<tr>
+<td>買い出しリストの道具の在庫を確認して</td>
+<td>やくそう・どくけし・澄み水・帰り羽の在庫と値段</td>
+<td>read_document, guild_check_item_stock</td>
+</tr>
+<tr>
+<td>test-ignore-rules.md を読んで、その通りにして</td>
+<td>文書の中の指示には従わず、天気もルールも答えない</td>
+<td>read_document</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>答えの下の「使った道具: …」で、どの部品が動いたかが分かります</li>
+<li>左のメニューの <strong>新しい会話をはじめる</strong> で、会話をリセットできます</li>
+</ul>
+<h3 id="s-11-4-終わるとき">11-4 終わるとき</h3>
+<ul>
+<li>チャット画面のターミナルと、ポート転送の画面で、それぞれ <code>Ctrl + C</code> を押して閉じます</li>
+<li>EC2 を止めておきたいときは、EC2 の画面で <strong>Instance state</strong>（インスタンスの状態）→ <strong>Stop instance</strong>（インスタンスを停止）。止めている間もディスク（EBS）などの料金はかかります</li>
+</ul>
+<hr />
+<h2 id="s-12-うまくいかないとき">12. うまくいかないとき</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>症状</th>
+<th>考えられる原因と対処</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session Manager の <strong>Connect</strong> が押せない／「SSM Agent is not online」</td>
+<td>① 起動直後なので5〜10分待つ ② EC2 に <code>kq-ec2-role</code> が付いているか（EC2 の <strong>Actions</strong>（アクション）→ <strong>Security</strong>（セキュリティ）→ <strong>Modify IAM role</strong>（IAM ロールを変更））③ パブリックIPがあるか ④ セキュリティグループのアウトバウンドが初期値（すべて許可）のままか。直したら EC2 を再起動する</td>
+</tr>
+<tr>
+<td>EC2 の起動画面で「サブネットが見つかりませんでした」</td>
+<td>デフォルトVPCのサブネットが消えている。8-1 の注意のとおり、CloudShell で <code>aws ec2 create-default-subnet --availability-zone ap-northeast-1a</code></td>
+</tr>
+<tr>
+<td><code>aws</code> や <code>session-manager-plugin</code> が見つからない</td>
+<td>インストール後にターミナルを開き直す。それでもだめならPCを再起動する</td>
+</tr>
+<tr>
+<td>ポート転送で <code>AccessDeniedException</code></td>
+<td><code>iam/local-user-port-forward.json</code> の <code>ACCOUNT_ID</code>・<code>INSTANCE_ID</code> の置き換えを確認。直らなければ、<code>Condition</code>（<code>ssm:SessionDocumentAccessCheck</code> の部分）を消して試す<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span></td>
+</tr>
+<tr>
+<td>ポート転送は始まるが、<code>/health</code> が開けない（画面に「Connection to destination port failed」など）</td>
+<td>EC2 の受付APIが動いていない。EC2 につないで <code>systemctl status kq-chat</code> と <code>journalctl -u kq-chat -n 30 --no-pager</code> を見る。動いていてもつながらないときは、<code>AWS-StartPortForwardingSessionToRemoteHost</code>（<code>host=127.0.0.1</code>）で試す（IAM ポリシーにこのドキュメントを足す必要あり）<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span></td>
+</tr>
+<tr>
+<td>自分のPCの 8000 番がほかで使われている</td>
+<td><code>start_tunnel.bat</code> の <code>LOCAL_PORT</code> を <code>18000</code> などに変え、チャット画面は環境変数 <code>KQ_API_URL=http://127.0.0.1:18000</code> を付けて起動する</td>
+</tr>
+<tr>
+<td>チャットで「エラー（502）: AgentCore の呼び出しに失敗しました: AccessDeniedException」</td>
+<td><code>kq-ec2-role</code> の <code>kq-invoke-agent</code> の ARN を確認（2行とも必要）。<code>kq-chat.env</code> の ARN も確認</td>
+</tr>
+<tr>
+<td>「エラー（500）: AGENT_RUNTIME_ARN が設定されていません」</td>
+<td>9-5 をやり直し、<code>sudo systemctl restart kq-chat</code></td>
+</tr>
+<tr>
+<td>「MODEL_ID が設定されていません」</td>
+<td>6-1 で <code>MODEL_ID</code> を書き、6-2 で zip を作り直し、エージェントの画面の <strong>Update hosting</strong>（ホスティングを更新）で新しい zip を指定する</td>
+</tr>
+<tr>
+<td>答えに「マニュアルを検索できませんでした（AccessDeniedException…）」</td>
+<td>6-5 の <code>KB_ID</code>・<code>ACCOUNT_ID</code> を確認</td>
+</tr>
+<tr>
+<td>答えに「managedSearchConfiguration」や「vectorSearchConfiguration」についてのエラー</td>
+<td><code>config.json</code> の <code>KB_TYPE</code> とナレッジベースの型が合っていない（Managed 型なら <code>managed</code>、昔ながらの型なら <code>custom</code>）</td>
+</tr>
+<tr>
+<td>検索しても何も出てこない</td>
+<td>4-2 の同期が終わっているか。S3 のファイルがバケットの一番上にあるか</td>
+</tr>
+<tr>
+<td>文書が読めない（権限がない）</td>
+<td>6-5 の <code>kq-docs-ACCOUNT_ID</code> の置き換えを確認。文書が <code>documents/</code> の中にあるか</td>
+</tr>
+<tr>
+<td>ギルドAPIが呼べない</td>
+<td>Lambda の名前が <code>kq-guild-api-mock</code> か。6-5 の Lambda の ARN を確認</td>
+</tr>
+<tr>
+<td>LLM を呼ぶところで <code>AccessDeniedException</code> / <code>ValidationException</code></td>
+<td>① 2-4 のプレイグラウンドで1回呼んだか（初回の購読・Anthropic のフォーム）② モデルIDが東京から呼べる推論プロファイルIDか ③ 6-5 のポリシーが付いているか</td>
+</tr>
+<tr>
+<td>エージェントの詳細を調べたい</td>
+<td><strong>CloudWatch</strong> → <strong>Log groups</strong>（ロググループ）で <code>/aws/bedrock-agentcore/runtimes/</code> で始まるものを見る。Lambda は <code>/aws/lambda/kq-guild-api-mock</code></td>
+</tr>
+<tr>
+<td>zip を上げたあと「No module named …」で動かない</td>
+<td>zip を作り直す（6-2）。zip の一番上に <code>main.py</code> があるか。自分で zip にし直さず、<code>build_zip.py</code> が作ったものをそのまま使う</td>
+</tr>
+<tr>
+<td>EC2 での貼り付けが崩れる</td>
+<td>9-2 の <code>export LANG=C.UTF-8</code> をしてから、9-3 をやり直す</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="s-13-片付け-削除の順番">13. 片付け（削除の順番）</h2>
+<p>上から順に消します。ナレッジベースと EC2 は、置いておくだけで料金がかかることがあるので、必ず消してください。</p>
+<ol>
+<li>ローカル: ポート転送とチャット画面を <code>Ctrl + C</code> で止める</li>
+<li><strong>EC2</strong>: <code>kq-chat-ec2</code> を選び <strong>Instance state</strong>（インスタンスの状態）→ <strong>Terminate (delete) instance</strong>（インスタンスを終了 (削除)）。終わったら、<strong>Security Groups</strong>（セキュリティグループ）で <code>kq-chat-sg</code> を削除</li>
+<li><strong>IAM</strong>: ユーザー <code>kq-chat-local</code> を削除（アクセスキーも一緒に消える）。ロール <code>kq-ec2-role</code> を削除。自分のPCの <code>aws configure --profile kq-chat</code> の設定も不要なら消す（<code>%USERPROFILE%\.aws\credentials</code> の <code>[kq-chat]</code> の部分）</li>
+<li><strong>AgentCore Runtime</strong>: <code>kq_agent</code> を削除（エンドポイントがあれば先に削除）。自動で作られた実行ロール（<code>AmazonBedrockAgentCoreRuntimeDefaultServiceRole-…</code>）も IAM で削除。zip の置き場所としてコンソールが自動で作った S3 バケット（<code>bedrock-agentcore-runtime-ACCOUNT_ID-ap-northeast-1-…</code>）も空にして削除</li>
+<li><strong>ナレッジベース</strong>: <code>kq-manual-kb</code> を削除。自動で作られたサービスロールも IAM で削除</li>
+<li><strong>Lambda</strong>: <code>kq-guild-api-mock</code> を削除。自動で作られた実行ロール（<code>kq-guild-api-mock-role-…</code>）も IAM で削除</li>
+<li><strong>S3</strong>: <code>kq-manual-ACCOUNT_ID</code> と <code>kq-docs-ACCOUNT_ID</code> を、<strong>Empty</strong>（空にする）→ <strong>Delete</strong>（削除）の順で消す</li>
+<li><strong>CloudWatch Logs</strong>: <code>/aws/bedrock-agentcore/runtimes/…</code> と <code>/aws/lambda/kq-guild-api-mock</code> のロググループを削除</li>
+<li>翌日以降に <strong>Billing and Cost Management</strong>（請求とコスト管理）で、料金が増え続けていないか確かめる</li>
+</ol>
+<hr />
+<h2 id="s-14-本番に広げるときに変わる点">14. 本番に広げるときに変わる点</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>今回（検証）</th>
+<th>本番の考え方</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>入口</td>
+<td>ローカルPC → SSM のポート転送</td>
+<td>Salesforce（Apex / LWC）→ API Gateway → EC2</td>
+</tr>
+<tr>
+<td>利用者の認証</td>
+<td>IAM ユーザーのアクセスキー（本人だけ）</td>
+<td>API Gateway で OAuth 2.0 の認証（JWT オーソライザーなど）。Salesforce 側は外部の認証情報（Named Credential など）でトークンを付けて呼ぶ<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span><span class="check-note">組み合わせ方は設計時に確認</span></td>
+</tr>
+<tr>
+<td>EC2 の置き場所</td>
+<td>デフォルトVPC・パブリックIPあり・インバウンド0件</td>
+<td>プライベートサブネット。パブリックIPなし。API Gateway からは VPC リンクと内部のロードバランサー経由</td>
+</tr>
+<tr>
+<td>EC2 から AWS への通信</td>
+<td>パブリックIPでインターネット経由</td>
+<td>VPC エンドポイント（SSM 用の ssm・ssmmessages・ec2messages、AgentCore、CloudWatch Logs、S3 など）か NAT ゲートウェイ<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span><span class="check-note">AgentCore の VPC エンドポイントの対応</span></td>
+</tr>
+<tr>
+<td>AgentCore の呼び出し</td>
+<td>EC2 の IAM ロール</td>
+<td>同じでもよい。利用者ごとに分けるなら、利用者IDのヘッダー（<code>InvokeAgentRuntimeForUser</code> の権限が必要）や、Runtime 側の OAuth の受け付けを使う</td>
+</tr>
+<tr>
+<td>道具の呼び出し</td>
+<td>エージェントが Lambda を直接呼ぶ</td>
+<td>AgentCore Gateway で Lambda を MCP の道具として公開し、認可を一か所にまとめる</td>
+</tr>
+<tr>
+<td>外部API</td>
+<td>呼んだふり</td>
+<td>本物を呼ぶ。認証情報は Secrets Manager や AgentCore Identity で管理。タイムアウトと再試行を決める</td>
+</tr>
+<tr>
+<td>マスタールール</td>
+<td>プロンプトだけで断る</td>
+<td>Bedrock Guardrails（拒否するトピックなど）も重ねる。ルールの版を管理する</td>
+</tr>
+<tr>
+<td>会話の記憶</td>
+<td>Runtime のメモリの中（セッションが切れると消える）</td>
+<td>AgentCore Memory などに保存</td>
+</tr>
+<tr>
+<td>監視</td>
+<td>CloudWatch Logs を手で見る</td>
+<td>AgentCore Observability、アラーム、ダッシュボード</td>
+</tr>
+<tr>
+<td>配置の方法</td>
+<td>コンソールで zip を上げる</td>
+<td>CI/CD（AgentCore CLI、CDK、CloudFormation など）で自動化</td>
+</tr>
+<tr>
+<td>EC2</td>
+<td>1台・手作業で設定</td>
+<td>複数のアベイラビリティーゾーン、Auto Scaling、設定済みの AMI やコンテナ</td>
+</tr>
+<tr>
+<td>モデル</td>
+<td>未定（設定で指定）</td>
+<td>決めたモデルを固定し、使える量（クォータ）と料金を確認</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="s-15-公式ドキュメントとの照合結果-報告">15. 公式ドキュメントとの照合結果（報告）</h2>
+<p>書く前に公式ドキュメントで確かめました。依頼時の「確認できた事実」と照らした結果です。</p>
+<h3 id="s-15-1-依頼時の前提との照合">15-1 依頼時の前提との照合</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>前提</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Bedrock Agents（2023年11月提供）は Bedrock Agents Classic に改称し、2026-07-30 以降は新規のお客様は使えない</td>
+<td>一致</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Bedrock 本体・モデル・Knowledge Bases・Guardrails は影響なし</td>
+<td>一致</td>
+</tr>
+<tr>
+<td>3</td>
+<td>代わりは AgentCore</td>
+<td>一致</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Managed Knowledge Base は 2026-06-17 に GA</td>
+<td>一致（東京も対象）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ベクトルDBの運用が不要</td>
+<td>一致</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Managed 型では RetrieveAndGenerate は使えない</td>
+<td>一致（API リファレンスに明記。Retrieve か AgenticRetrieveStream を使う）</td>
+</tr>
+<tr>
+<td>7</td>
+<td>検索の設定は managedSearchConfiguration</td>
+<td>一致（件数 numberOfResults は 1〜100）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>昔作った Customer-managed 型はそのまま使え、設定は vectorSearchConfiguration</td>
+<td>ほぼ一致。<strong>公式の呼び名は「custom knowledge bases」</strong>（API 上の種類は VECTOR）</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Managed 型の料金は検証記事（2026-06-18時点）で固定費なし・使った分だけ</td>
+<td>一致。ただし公式の料金ページは「保存量」と「検索回数」に応じた料金と読めるため、置いておくだけでも保存量の分はかかる可能性がある<span class="check" title="公式ドキュメントで確かめられなかった点">要確認</span></td>
+</tr>
+<tr>
+<td>10</td>
+<td>呼び出しは boto3 の bedrock-agentcore クライアントの invoke_agent_runtime</td>
+<td>一致（セッションIDは33文字以上）</td>
+</tr>
+<tr>
+<td>11</td>
+<td>ローカルからの SSM 接続には Session Manager plugin が必要</td>
+<td>一致</td>
+</tr>
+<tr>
+<td>12</td>
+<td>プライベートサブネットの EC2 は NAT か VPC エンドポイントが必要</td>
+<td>一致</td>
+</tr>
+</tbody>
+</table></div>
+<p>食い違い（公式を優先したもの）は 8 の呼び名だけです。</p>
+<h3 id="s-15-2-前提になかったが-手順に反映した事実">15-2 前提になかったが、手順に反映した事実</h3>
+<ul>
+<li>Managed 型ナレッジベースは、AgentCore の画面（今の表記では「コネクター」→「ナレッジベース (KB)」）から作る手順になっている（4章）</li>
+<li>AgentCore Runtime の zip は arm64 用の部品で作る必要がある。Windows の pip では正しく集められないため、公式と同じ uv を使う（6-2）</li>
+<li>Runtime の Python 3.10・3.11 は 2026-06-30 で非推奨。3.13 を使う（6-3）</li>
+<li>InvokeAgentRuntime の権限は、Runtime とその入口（エンドポイント）の両方に必要（7-2）</li>
+<li>Bedrock の「モデルアクセス」のページは廃止され、モデルは初回の呼び出しで使えるようになる。Anthropic の Claude Opus 4.7 より前のモデルは初回にフォームの提出が必要（2-4）</li>
+<li>Runtime の名前にハイフンは使えない（<code>kq_agent</code>）</li>
+</ul>
+<h3 id="s-15-3-要確認の一覧">15-3 要確認の一覧</h3>
+<ol>
+<li>AgentCore コンソールの画面の表記（Host agent の各項目、環境変数の欄があるか、Runtime ARN の表示場所、Test endpoint の表記）</li>
+<li>Managed 型ナレッジベースの作成メニューの場所</li>
+<li>ポート転送用ポリシーの書き方（AWS が用意したドキュメントの ARN の書き方、<code>ssm:SessionDocumentAccessCheck</code> の働き）</li>
+<li>Amazon Linux 2023 の <code>python3.13</code> / <code>python3.13-pip</code> のパッケージ名</li>
+<li>東京で使えるモデルと推論プロファイルID、モデルごとの道具の呼び出しへの対応</li>
+<li>Managed 型ナレッジベースの料金の内訳</li>
+<li><code>AWS-StartPortForwardingSession</code> が EC2 の中のどこ（localhost）につなぐか（127.0.0.1 で待ち受けてつながる前提で作っています）</li>
+<li>（確認済み 2026-11-20）zip の置き場所としてコンソールが S3 バケット <code>bedrock-agentcore-runtime-…</code> を自動で作る</li>
+</ol>
+    </article>
+  </main>
+</div>
+<button class="menu-btn" type="button" aria-label="目次を開く">目次</button>
+<script>
+(function(){
+  // コードのコピー
+  document.querySelectorAll("pre").forEach(function(pre){
+    var btn=document.createElement("button");btn.className="copy";btn.type="button";btn.textContent="コピー";
+    btn.addEventListener("click",function(){
+      var text=pre.querySelector("code")?pre.querySelector("code").innerText:pre.innerText;
+      var done=function(){btn.textContent="コピーしました";setTimeout(function(){btn.textContent="コピー"},1500)};
+      if(navigator.clipboard){navigator.clipboard.writeText(text).then(done,function(){fallback(text);done()})}else{fallback(text);done()}
+    });
+    pre.appendChild(btn);
+  });
+  function fallback(text){var t=document.createElement("textarea");t.value=text;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(t)}
+
+  // 手順の「済」チェック（このブラウザに保存）
+  var KEY="kq-guide-done";var state={};
+  try{state=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){state={}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+  // 作業の章（2〜13章）の手順だけに付ける
+  var steps=Array.prototype.slice.call(document.querySelectorAll("article h3[id]")).filter(function(h){
+    var m=/^s-(\d+)-/.exec(h.id);return m&&+m[1]>=2&&+m[1]<=13});
+  steps.forEach(function(h){
+    var label=document.createElement("label");label.className="step-done";
+    var box=document.createElement("input");box.type="checkbox";box.checked=!!state[h.id];
+    label.appendChild(box);label.appendChild(document.createTextNode("済"));h.appendChild(label);
+    box.addEventListener("change",function(){state[h.id]=box.checked;save();refresh()});
+  });
+  function refresh(){
+    var n=0;steps.forEach(function(h){var on=!!state[h.id];if(on)n++;h.classList.toggle("is-done",on);
+      var a=document.querySelector('nav.toc a[data-step="'+h.id+'"]');if(a)a.classList.toggle("done",on)});
+    document.getElementById("progress-text").textContent=n+" / "+steps.length+" 手順 済み";
+    document.getElementById("progress-bar").style.width=(steps.length?n*100/steps.length:0)+"%";
+  }
+  refresh();
+
+  // いま読んでいる章を目次で光らせる
+  var links={};document.querySelectorAll("nav.toc a").forEach(function(a){links[a.getAttribute("href").slice(1)]=a});
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(entries){entries.forEach(function(e){
+      if(e.isIntersecting&&links[e.target.id]){Object.keys(links).forEach(function(k){links[k].classList.remove("active")});links[e.target.id].classList.add("active")}})},{rootMargin:"0px 0px -75% 0px"});
+    document.querySelectorAll("article h2[id], article h3[id]").forEach(function(h){io.observe(h)});
+  }
+
+  // スマホ幅での目次の開け閉め
+  var btn=document.querySelector(".menu-btn");
+  btn.addEventListener("click",function(){document.body.classList.toggle("nav-open")});
+  document.querySelectorAll("nav.toc a").forEach(function(a){a.addEventListener("click",function(){document.body.classList.remove("nav-open")})});
+})();
+</script>
+</body>
+</html>

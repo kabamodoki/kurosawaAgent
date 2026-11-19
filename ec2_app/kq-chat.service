@@ -1,0 +1,15 @@
+[Unit]
+Description=Kurosawa Quest chat API (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/kq-chat
+EnvironmentFile=/home/ec2-user/kq-chat/kq-chat.env
+ExecStart=/home/ec2-user/kq-chat/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

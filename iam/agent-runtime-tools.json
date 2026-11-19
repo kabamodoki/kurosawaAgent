@@ -1,0 +1,46 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeBedrockModels",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:*::foundation-model/*",
+        "arn:aws:bedrock:ap-northeast-1:ACCOUNT_ID:inference-profile/*"
+      ]
+    },
+    {
+      "Sid": "SearchManualKnowledgeBase",
+      "Effect": "Allow",
+      "Action": "bedrock:Retrieve",
+      "Resource": "arn:aws:bedrock:ap-northeast-1:ACCOUNT_ID:knowledge-base/KB_ID"
+    },
+    {
+      "Sid": "ListUploadedDocuments",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::kq-docs-ACCOUNT_ID",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": "documents/*"
+        }
+      }
+    },
+    {
+      "Sid": "ReadUploadedDocuments",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::kq-docs-ACCOUNT_ID/documents/*"
+    },
+    {
+      "Sid": "CallGuildApiMock",
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:ap-northeast-1:ACCOUNT_ID:function:kq-guild-api-mock"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+[server]
+address = "127.0.0.1"
+port = 8501
+# 初回起動でターミナルがメールアドレスの入力待ちで止まらないようにする（ブラウザは自動で開く）
+showEmailPrompt = false
+
+[browser]
+gatherUsageStats = false

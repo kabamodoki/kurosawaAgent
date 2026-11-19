@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+agent/dist/
+*.csv
+
+# 作業用のメモ・手元だけのファイル（GitHub に上げない）
+メモ.txt
+*.local.*
+docs/requirements.txt
